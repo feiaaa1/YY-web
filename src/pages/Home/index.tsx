@@ -97,7 +97,7 @@ export default function HomePage() {
               className="font-display mb-6 leading-[1.1]"
               style={{
                 fontFamily: 'Playfair Display, serif',
-                fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+                fontSize: 'clamp(2rem, 7vw, 5.5rem)',
                 fontWeight: 900,
                 color: 'var(--text-primary)',
               }}
@@ -107,7 +107,6 @@ export default function HomePage() {
               <em
                 style={{
                   display: 'inline-block',
-                  width: '400px',
                   fontStyle: 'italic',
                   background: 'linear-gradient(135deg, #FF69B4 0%, #FF7F50 50%, #FFD700 100%)',
                   WebkitBackgroundClip: 'text',
@@ -229,7 +228,7 @@ export default function HomePage() {
       {/* Featured Section */}
       <section
         id="featured-cases"
-        className="py-24"
+        className="py-16 md:py-24"
         style={{ background: 'var(--ink-soft)' }}
       >
         <div className="container mx-auto px-6 lg:px-8">
@@ -250,7 +249,7 @@ export default function HomePage() {
       {/* Trending Section */}
       <section
         id="trending-cases"
-        className="py-24"
+        className="py-16 md:py-24"
         style={{ background: 'var(--ink)' }}
       >
         <div className="container mx-auto px-6 lg:px-8">
@@ -283,7 +282,7 @@ function SectionHeader({
   href: string;
 }) {
   return (
-    <div className="flex items-end justify-between mb-12">
+    <div className="flex items-start justify-between mb-8 md:mb-12 gap-4">
       <div>
         <div
           className="flex items-center gap-2 mb-3"
@@ -300,7 +299,7 @@ function SectionHeader({
           </span>
         </div>
         <h2
-          className="text-3xl md:text-4xl font-bold mb-2"
+          className="text-2xl md:text-4xl font-bold mb-2"
           style={{
             fontFamily: 'Playfair Display, serif',
             color: 'var(--text-primary)',
@@ -314,12 +313,12 @@ function SectionHeader({
       </div>
       <Link
         to={href}
-        className="hidden sm:flex items-center gap-2 text-sm font-medium transition-colors duration-200 group"
+        className="flex-shrink-0 flex items-center gap-1.5 text-sm font-medium transition-colors duration-200 group mt-1"
         style={{ color: 'var(--text-muted)' }}
         onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--gold)')}
         onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}
       >
-        查看全部
+        <span className="hidden sm:inline">查看全部</span>
         <svg
           width="14"
           height="14"

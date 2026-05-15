@@ -6,6 +6,7 @@ import { useTheme } from '@/hooks/useTheme';
 export const Navbar = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -13,6 +14,11 @@ export const Navbar = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const navLinks = [
     { name: '首页', path: '/' },
@@ -26,9 +32,9 @@ export const Navbar = () => {
         scrolled ? 'border-b' : 'border-b border-transparent'
       )}
       style={{
-        backgroundColor: scrolled ? 'var(--navbar-bg)' : 'transparent',
+        backgroundColor: mobileOpen ? 'var(--navbar-bg)' : scrolled ? 'var(--navbar-bg)' : 'transparent',
         borderColor: scrolled ? 'var(--border)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        backdropFilter: scrolled || mobileOpen ? 'blur(12px)' : 'none',
       }}
     >
       <div className="container mx-auto px-6 lg:px-8">
@@ -45,7 +51,7 @@ export const Navbar = () => {
             </span>
           </Link>
 
-          {/* Nav links */}
+          {/* Desktop nav links */}
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
@@ -127,15 +133,64 @@ export const Navbar = () => {
               )}
             </button>
 
-            {/* Mobile search */}
-            <Link to="/cases" className="md:hidden p-2" style={{ color: 'var(--text-secondary)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-              </svg>
-            </Link>
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileOpen(v => !v)}
+              className="md:hidden p-2 rounded-lg transition-colors duration-200"
+              style={{ color: 'var(--text-secondary)' }}
+              aria-label={mobileOpen ? '关闭菜单' : '打开菜单'}
+            >
+              {mobileOpen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/>
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div
+          className="md:hidden border-t"
+          style={{ borderColor: 'var(--border)', background: 'var(--navbar-bg)' }}
+        >
+          <nav className="container mx-auto px-6 py-4 flex flex-col gap-1">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium transition-colors duration-200"
+                  style={{
+                    color: isActive ? 'var(--gold)' : 'var(--text-secondary)',
+                    background: isActive ? 'rgba(201,168,76,0.08)' : 'transparent',
+                  }}
+                >
+                  {link.name}
+                  {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: 'var(--gold)' }} />}
+                </Link>
+              );
+            })}
+            <Link
+              to="/cases"
+              className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium transition-colors duration-200 mt-1"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              搜索案例
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };

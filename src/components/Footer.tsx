@@ -6,9 +6,9 @@ export const Footer = () => {
       className="border-t mt-auto"
       style={{ background: 'var(--ink-soft)', borderColor: 'var(--border)' }}
     >
-      <div className="container mx-auto px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          <div className="col-span-1 md:col-span-2">
+      <div className="container mx-auto px-6 lg:px-8 py-10 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12">
+          <div className="col-span-2 md:col-span-2">
             <Link to="/" className="flex items-center gap-3 mb-5 group w-fit">
               <img
                 src="/icon_32x32.png"

@@ -4,6 +4,7 @@ import { api } from '@/lib/api';
 import { Case } from '@/types/database';
 import { CaseCard } from '@/components/CaseCard';
 import { CATEGORY_MAP, REGION_MAP } from '@/lib/utils';
+import { SlidersHorizontal, X } from 'lucide-react';
 
 export default function CasesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,6 +18,7 @@ export default function CasesPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [batchStart, setBatchStart] = useState(0);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const currentQuery = searchParams.get('q') || '';
   const currentRegion = searchParams.get('region') || 'all';
@@ -87,8 +89,8 @@ export default function CasesPage() {
         className="border-b"
         style={{ background: 'var(--ink-soft)', borderColor: 'var(--border)' }}
       >
-        <div className="container mx-auto px-6 lg:px-8 py-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="container mx-auto px-6 lg:px-8 py-8 md:py-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="h-px w-6" style={{ background: 'var(--gold)' }} />
@@ -100,7 +102,7 @@ export default function CasesPage() {
                 </span>
               </div>
               <h1
-                className="text-3xl md:text-4xl font-bold mb-1"
+                className="text-2xl md:text-4xl font-bold mb-1"
                 style={{ fontFamily: 'Playfair Display, serif', color: 'var(--text-primary)' }}
               >
                 全部案例
@@ -110,54 +112,121 @@ export default function CasesPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSearchSubmit} className="w-full md:w-auto">
-              <div
-                className="flex items-center rounded-full overflow-hidden"
-                style={{ border: '1px solid var(--border)', background: 'rgba(245,240,232,0.04)' }}
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              {/* Mobile filter button */}
+              <button
+                onClick={() => setFilterOpen(true)}
+                className="lg:hidden flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium flex-shrink-0 transition-all duration-200"
+                style={{ border: '1px solid var(--border-warm)', color: 'var(--text-secondary)', background: 'transparent' }}
               >
-                <svg
-                  className="ml-4 flex-shrink-0"
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ color: 'var(--text-muted)' }}
+                <SlidersHorizontal className="w-4 h-4" />
+                筛选
+              </button>
+
+              <form onSubmit={handleSearchSubmit} className="flex-1 md:flex-none">
+                <div
+                  className="flex items-center rounded-full overflow-hidden"
+                  style={{ border: '1px solid var(--border)', background: 'rgba(245,240,232,0.04)' }}
                 >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
-                <input
-                  type="text"
-                  name="search"
-                  defaultValue={currentQuery}
-                  placeholder="搜索案例名称…"
-                  className="py-2.5 px-3 outline-none bg-transparent text-sm w-64"
-                  style={{ color: 'var(--text-primary)', caretColor: 'var(--gold)' }}
-                />
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
-                    color: 'var(--ink)',
-                  }}
-                >
-                  搜索
-                </button>
-              </div>
-            </form>
+                  <svg
+                    className="ml-4 flex-shrink-0"
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                  <input
+                    type="text"
+                    name="search"
+                    defaultValue={currentQuery}
+                    placeholder="搜索案例名称…"
+                    className="py-2.5 px-3 outline-none bg-transparent text-sm w-full md:w-56"
+                    style={{ color: 'var(--text-primary)', caretColor: 'var(--gold)' }}
+                  />
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 flex-shrink-0"
+                    style={{
+                      background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    搜索
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile filter drawer overlay */}
+      {filterOpen && (
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          onClick={() => setFilterOpen(false)}
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+        />
+      )}
+
+      {/* Mobile filter drawer */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-72 lg:hidden transition-transform duration-300 overflow-y-auto ${filterOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: 'var(--ink-soft)', borderRight: '1px solid var(--border)' }}
+      >
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="w-4 h-4" style={{ color: 'var(--gold)' }} />
+            <span className="text-sm font-semibold tracking-widest uppercase" style={{ color: 'var(--text-secondary)', fontFamily: 'DM Mono, monospace' }}>
+              筛选
+            </span>
+          </div>
+          <button
+            onClick={() => setFilterOpen(false)}
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-5">
+          <FilterGroup label="区域">
+            <FilterOption label="不限" checked={currentRegion === 'all'} onChange={() => updateFilter('region', 'all')} />
+            {Object.entries(REGION_MAP).map(([key, label]) => (
+              <FilterOption key={key} label={label} checked={currentRegion === key} onChange={() => updateFilter('region', key)} />
+            ))}
+          </FilterGroup>
+          <FilterGroup label="内容类型">
+            <FilterOption label="不限" checked={currentType === 'all'} onChange={() => updateFilter('type', 'all')} />
+            {Object.entries(CATEGORY_MAP).map(([key, label]) => (
+              <FilterOption key={key} label={label} checked={currentType === key} onChange={() => updateFilter('type', key)} />
+            ))}
+          </FilterGroup>
+          <FilterGroup label="排序方式" last>
+            {[
+              { value: 'collected_at', label: '最新收录' },
+              { value: 'published_at', label: '最新发布' },
+              { value: 'engagement_score', label: '互动量最高' },
+              { value: 'quality_score', label: '质量分最高' },
+            ].map((opt) => (
+              <FilterOption key={opt.value} label={opt.label} checked={currentOrder === opt.value} onChange={() => updateFilter('order', opt.value)} />
+            ))}
+          </FilterGroup>
         </div>
       </div>
 
       <div className="container mx-auto px-6 lg:px-8 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className="lg:w-56 flex-shrink-0">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block lg:w-56 flex-shrink-0">
             <div
               className="rounded-2xl p-5 sticky top-24"
               style={{ background: 'var(--ink-soft)', border: '1px solid var(--border)' }}

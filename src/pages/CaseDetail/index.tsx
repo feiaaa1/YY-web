@@ -62,11 +62,11 @@ function TagPill({ children, variant = 'gray' }: { children: React.ReactNode; va
 function SectionCard({ id, title, icon, children }: { id: string; title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <section id={id} className="rounded-2xl overflow-hidden" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border)' }}>
-      <div className="flex items-center gap-3 px-7 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className="flex items-center gap-3 px-5 md:px-7 py-4 md:py-5" style={{ borderBottom: '1px solid var(--border)' }}>
         <span style={{ color: 'var(--gold)' }}>{icon}</span>
-        <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>{title}</h2>
+        <h2 className="text-base md:text-lg font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>{title}</h2>
       </div>
-      <div className="px-7 py-6">{children}</div>
+      <div className="px-5 md:px-7 py-5 md:py-6">{children}</div>
     </section>
   );
 }
@@ -165,7 +165,7 @@ export default function CaseDetailPage() {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-2" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-2xl md:text-4xl font-extrabold leading-tight mb-2" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>
               {data.title_cn || data.title}
             </h1>
             {data.title_cn && (
@@ -173,7 +173,7 @@ export default function CaseDetailPage() {
             )}
 
             {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-5 text-sm mb-8" style={{ color: 'var(--text-secondary)' }}>
+            <div className="flex flex-wrap items-center gap-3 md:gap-5 text-sm mb-8" style={{ color: 'var(--text-secondary)' }}>
               {/* Brand */}
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full border overflow-hidden flex items-center justify-center flex-shrink-0" style={{ background: 'var(--ink-muted)', borderColor: 'var(--border)' }}>
@@ -204,7 +204,7 @@ export default function CaseDetailPage() {
                 href={data.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 hover:opacity-90"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 hover:opacity-90 md:ml-auto"
                 style={{ background: 'linear-gradient(135deg, var(--gold-light), var(--gold))', color: 'var(--ink)' }}
               >
                 查看原文 <ExternalLink className="w-4 h-4" />
@@ -213,7 +213,7 @@ export default function CaseDetailPage() {
 
             {/* Summary */}
             {data.summary && (
-              <p className="text-lg leading-relaxed pl-5" style={{ color: 'var(--text-secondary)', borderLeft: '3px solid var(--gold)' }}>
+              <p className="text-base md:text-lg leading-relaxed pl-4 md:pl-5" style={{ color: 'var(--text-secondary)', borderLeft: '3px solid var(--gold)' }}>
                 {data.summary}
               </p>
             )}
@@ -226,8 +226,8 @@ export default function CaseDetailPage() {
 
         {/* ② Core Metrics */}
         <section id="metrics">
-          <div className="rounded-2xl p-8" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border-warm)' }}>
-            <div className="flex flex-wrap items-center justify-around gap-8">
+          <div className="rounded-2xl p-5 md:p-8" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border-warm)' }}>
+            <div className="flex flex-wrap items-center justify-around gap-6 md:gap-8">
               {/* Scores */}
               {analysis && (
                 <>
@@ -237,10 +237,10 @@ export default function CaseDetailPage() {
                 </>
               )}
               {/* Engagement */}
-              <div className="flex gap-6">
+              <div className="flex gap-4 md:gap-6">
                 <div className="text-center">
                   <Eye className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--text-secondary)' }} />
-                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
                     {data.engagement_views != null
                       ? data.engagement_views >= 10000
                         ? `${(data.engagement_views / 10000).toFixed(1)}W`
@@ -251,7 +251,7 @@ export default function CaseDetailPage() {
                 </div>
                 <div className="text-center">
                   <Heart className="w-5 h-5 mx-auto mb-1" style={{ color: '#fda4af' }} />
-                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
                     {data.engagement_likes != null
                       ? data.engagement_likes >= 10000
                         ? `${(data.engagement_likes / 10000).toFixed(1)}W`
@@ -262,12 +262,12 @@ export default function CaseDetailPage() {
                 </div>
                 <div className="text-center">
                   <MessageCircle className="w-5 h-5 mx-auto mb-1" style={{ color: '#7dd3fc' }} />
-                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_comments ?? '-'}</div>
+                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_comments ?? '-'}</div>
                   <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>评论数</div>
                 </div>
                 <div className="text-center">
                   <Share2 className="w-5 h-5 mx-auto mb-1" style={{ color: '#6ee7b7' }} />
-                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_shares ?? '-'}</div>
+                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_shares ?? '-'}</div>
                   <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>分享数</div>
                 </div>
               </div>
