@@ -44,23 +44,23 @@ export default function HomePage() {
         className="relative min-h-[88vh] flex flex-col justify-center overflow-hidden"
         style={{ background: 'var(--ink)' }}
       >
-        {/* Background grid lines */}
+        {/* 晚霞渐变背景光晕 */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255,127,80,0.18) 0%, rgba(255,105,180,0.12) 40%, rgba(75,0,130,0.08) 70%, transparent 100%)',
+          }}
+        />
+
+        {/* 网格线 */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(245,240,232,0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(245,240,232,0.03) 1px, transparent 1px)
+              linear-gradient(rgba(255,215,0,0.04) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,215,0,0.04) 1px, transparent 1px)
             `,
             backgroundSize: '80px 80px',
-          }}
-        />
-
-        {/* Radial glow */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(201,168,76,0.06) 0%, transparent 70%)',
           }}
         />
 
@@ -75,17 +75,17 @@ export default function HomePage() {
             >
               <span
                 className="h-px w-8"
-                style={{ background: 'var(--gold)' }}
+                style={{ background: 'var(--gradient-dawn)', backgroundImage: 'linear-gradient(90deg, #FF69B4, #FFD700)' }}
               />
               <span
                 className="text-xs font-mono-custom tracking-[0.2em] uppercase"
-                style={{ color: 'var(--gold)', fontFamily: 'DM Mono, monospace' }}
+                style={{ background: 'linear-gradient(90deg, #FF69B4, #FFD700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontFamily: 'DM Mono, monospace' }}
               >
                 专属丫丫大王
               </span>
               <span
                 className="h-px w-8"
-                style={{ background: 'var(--gold)' }}
+                style={{ backgroundImage: 'linear-gradient(90deg, #FFD700, #FF69B4)' }}
               />
             </motion.div>
 
@@ -106,8 +106,10 @@ export default function HomePage() {
               <br />
               <em
                 style={{
+                  display: 'inline-block',
+                  width: '400px',
                   fontStyle: 'italic',
-                  background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
+                  background: 'linear-gradient(135deg, #FF69B4 0%, #FF7F50 50%, #FFD700 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -166,7 +168,7 @@ export default function HomePage() {
                   className="flex-1 py-4 px-4 outline-none bg-transparent text-base"
                   style={{
                     color: 'var(--text-primary)',
-                    caretColor: 'var(--gold)',
+                    caretColor: 'var(--dawn-coral)',
                   }}
                   placeholder="丫丫大王想找什么灵感？"
                   value={searchQuery}
@@ -176,8 +178,8 @@ export default function HomePage() {
                   type="submit"
                   className="mr-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 hover:opacity-90 active:scale-95"
                   style={{
-                    background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
-                    color: 'var(--ink)',
+                    background: 'linear-gradient(135deg, #FF7F50, #FFD700)',
+                    color: 'var(--dawn-violet-muted)',
                   }}
                 >
                   搜索

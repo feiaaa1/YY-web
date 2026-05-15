@@ -15,7 +15,7 @@ const ScrollToTop = () => {
 
 export default function Layout() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 font-sans text-gray-900">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--ink)', color: 'var(--text-primary)' }}>
       <ScrollToTop />
       <Navbar />
       <main className="flex-grow">

@@ -11,8 +11,8 @@ const NotFoundPage = lazy(() => import('@/pages/NotFound/index'));
 // Helper for lazy loading fallback
 const Lazy = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--ink)' }}>
+      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--gold)', borderTopColor: 'transparent' }} />
     </div>
   }>
     {children}

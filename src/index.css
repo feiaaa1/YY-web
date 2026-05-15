@@ -5,37 +5,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --ink: #0f0e0d;
-  --ink-soft: #1c1a18;
-  --ink-muted: #2e2b27;
-  --paper: #f5f0e8;
-  --paper-warm: #ede8dc;
-  --paper-dim: #d4cfc4;
-  --gold: #c9a84c;
-  --gold-light: #e8c96a;
-  --gold-dim: #8a6f2e;
-  --accent: #e05c3a;
-  --accent-soft: #f07a5a;
-  --text-primary: #f5f0e8;
-  --text-secondary: #a09a90;
-  --text-muted: #6b6560;
-  --border: rgba(245, 240, 232, 0.08);
-  --border-warm: rgba(201, 168, 76, 0.2);
-  --grain-opacity: 0.025;
-  --navbar-bg: rgba(15, 14, 13, 0.95);
+  /* 破晓晚霞色系 */
+  --dawn-violet: #4B0082;
+  --dawn-violet-soft: #2d0050;
+  --dawn-violet-muted: #1a002e;
+  --dawn-rose: #FF69B4;
+  --dawn-coral: #FF7F50;
+  --dawn-gold: #FFD700;
+  --dawn-gold-dim: #cc9f00;
+  --dawn-gold-soft: #ffe566;
+
+  /* 暗色主题语义变量（深紫罗兰背景） */
+  --ink: #0d0018;
+  --ink-soft: #1a002e;
+  --ink-muted: #2d0050;
+  --paper: #fff8e7;
+  --paper-warm: #fff0cc;
+  --paper-dim: #ffd966;
+  --gold: #FFD700;
+  --gold-light: #ffe566;
+  --gold-dim: #cc9f00;
+  --accent: #FF7F50;
+  --accent-soft: #FF69B4;
+  --text-primary: #fff8e7;
+  --text-secondary: #e8b4d0;
+  --text-muted: #b87fa8;
+  --border: rgba(255, 215, 0, 0.12);
+  --border-warm: rgba(255, 215, 0, 0.3);
+  --grain-opacity: 0.02;
+  --navbar-bg: rgba(13, 0, 24, 0.95);
+
+  /* 渐变 */
+  --gradient-dawn: linear-gradient(135deg, #4B0082 0%, #FF69B4 45%, #FF7F50 75%, #FFD700 100%);
+  --gradient-dawn-subtle: linear-gradient(135deg, rgba(75,0,130,0.6) 0%, rgba(255,105,180,0.4) 50%, rgba(255,215,0,0.3) 100%);
+  --gradient-accent: linear-gradient(135deg, #FF7F50, #FFD700);
+  --gradient-accent-hover: linear-gradient(135deg, #FF69B4, #FF7F50);
 }
 
 [data-theme="light"] {
-  --ink: #f5f0e8;
-  --ink-soft: #ede8dc;
-  --ink-muted: #d4cfc4;
-  --text-primary: #1a1714;
-  --text-secondary: #5a5248;
-  --text-muted: #8a8278;
-  --border: rgba(26, 23, 20, 0.1);
-  --border-warm: rgba(201, 168, 76, 0.35);
-  --grain-opacity: 0.015;
-  --navbar-bg: rgba(245, 240, 232, 0.95);
+  /* 亮色主题：破晓金/珊瑚橙暖调背景，深紫罗兰文字 */
+  --ink: #fff8e7;
+  --ink-soft: #fff0cc;
+  --ink-muted: #ffd966;
+  --text-primary: #1a002e;
+  --text-secondary: #4B0082;
+  --text-muted: #8a4070;
+  --border: rgba(75, 0, 130, 0.12);
+  --border-warm: rgba(255, 127, 80, 0.35);
+  --grain-opacity: 0.012;
+  --navbar-bg: rgba(255, 248, 231, 0.95);
 }
 
 [data-theme="light"] ::-webkit-scrollbar-track {
@@ -79,8 +97,8 @@ body {
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--ink);
+  background: var(--dawn-rose);
+  color: var(--dawn-violet-muted);
 }
 
 body::before {
