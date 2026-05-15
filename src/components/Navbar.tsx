@@ -1,66 +1,143 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Compass, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useState, useEffect } from 'react';
+import { useTheme } from '@/hooks/useTheme';
 
 export const Navbar = () => {
   const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navLinks = [
-    { name: '首页', path: '/', icon: Sparkles },
-    { name: '案例库', path: '/cases', icon: Compass },
+    { name: '首页', path: '/' },
+    { name: '案例库', path: '/cases' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-200/50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <header
+      className={cn(
+        'sticky top-0 z-50 w-full transition-all duration-300',
+        scrolled ? 'border-b' : 'border-b border-transparent'
+      )}
+      style={{
+        backgroundColor: scrolled ? 'var(--navbar-bg)' : 'transparent',
+        borderColor: scrolled ? 'var(--border)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+      }}
+    >
+      <div className="container mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <div
+              className="w-7 h-7 flex items-center justify-center text-xs font-bold transition-all duration-300 group-hover:scale-110"
+              style={{
+                background: 'linear-gradient(135deg, var(--gold), var(--gold-dim))',
+                color: 'var(--ink)',
+                clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+              }}
+            >
+              YY
             </div>
-            <span className="font-extrabold text-xl tracking-tight text-gray-900">
-              全球营销<span className="text-indigo-600">案例库</span>
+            <span className="font-display font-bold text-lg tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              营销案例库
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Nav links */}
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
-              const Icon = link.icon;
               const isActive = location.pathname === link.path;
               return (
                 <Link
                   key={link.path}
                   to={link.path}
                   className={cn(
-                    "flex items-center gap-2 text-sm font-medium transition-colors hover:text-indigo-600 py-2",
-                    isActive ? "text-indigo-600" : "text-gray-600"
+                    'text-sm font-medium tracking-wide transition-colors duration-200 relative py-1',
+                    isActive ? '' : 'hover:opacity-100'
                   )}
+                  style={{ color: isActive ? 'var(--gold)' : 'var(--text-secondary)' }}
                 >
-                  <Icon className="w-4 h-4" />
                   {link.name}
+                  {isActive && (
+                    <span
+                      className="absolute -bottom-0.5 left-0 right-0 h-px"
+                      style={{ background: 'var(--gold)' }}
+                    />
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-4">
-            <Link 
-              to="/cases" 
-              className="hidden sm:flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 bg-gray-100/50 hover:bg-gray-100 px-3 py-1.5 rounded-full transition-colors"
+          {/* Right */}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/cases"
+              className="hidden sm:flex items-center gap-2 text-sm px-4 py-1.5 rounded-full border transition-all duration-200"
+              style={{
+                color: 'var(--text-secondary)',
+                borderColor: 'var(--border)',
+                backgroundColor: 'rgba(128, 128, 128, 0.04)',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-warm)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+              }}
             >
-              <Search className="w-4 h-4" />
-              搜索案例...
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              搜索案例
             </Link>
-            
-            {/* Mobile Menu Button (simplified for aesthetic) */}
-            <div className="md:hidden flex items-center">
-              <Link to="/cases" className="p-2 text-gray-600">
-                <Compass className="w-5 h-5" />
-              </Link>
-            </div>
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full border transition-all duration-200"
+              style={{
+                color: 'var(--text-secondary)',
+                borderColor: 'var(--border)',
+                backgroundColor: 'transparent',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--gold)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-warm)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+              }}
+              aria-label={theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
+            >
+              {theme === 'dark' ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="4"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+              )}
+            </button>
+
+            {/* Mobile search */}
+            <Link to="/cases" className="md:hidden p-2" style={{ color: 'var(--text-secondary)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+            </Link>
           </div>
         </div>
       </div>
