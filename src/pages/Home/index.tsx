@@ -2,9 +2,15 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Case } from '@/types/database';
 import { CaseCard } from '@/components/CaseCard';
-import { Search, TrendingUp, Sparkles, ArrowRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
+const HOT_SEARCHES = [
+  { label: '瑞幸联名', href: '/cases?q=瑞幸' },
+  { label: 'Nike', href: '/cases?q=Nike' },
+  { label: '视频广告', href: '/cases?type=video_ad' },
+  { label: '整合营销', href: '/cases?type=integrated_campaign' },
+];
 
 export default function HomePage() {
   const [featuredCases, setFeaturedCases] = useState<Case[]>([]);
@@ -14,12 +20,11 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch Featured Cases
-      const featured = await api.getCases({ is_featured: true, order: 'quality_score', limit: 3 });
+      const [featured, trending] = await Promise.all([
+        api.getCases({ is_featured: true, order: 'quality_score', limit: 3 }),
+        api.getCases({ order: 'engagement_score', limit: 6 }),
+      ]);
       setFeaturedCases(featured.data);
-
-      // Fetch Trending Cases
-      const trending = await api.getCases({ order: 'engagement_score', limit: 6 });
       setTrendingCases(trending.data);
     };
     fetchData();
@@ -34,99 +39,299 @@ export default function HomePage() {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section id="hero" className="relative pt-24 pb-32 overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-5" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/0 to-white/100" />
-        
-        <div className="container relative z-10 mx-auto px-4 text-center max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold mb-6">
-              汇集全球顶尖营销智慧
-            </span>
-            <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6">
-              探索改变行业的<span className="text-indigo-600">营销案例</span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-2xl mx-auto">
-              收录数百个经过验证的成功案例，借助AI深度解析传播机制与策略，寻找下一个爆款灵感。
-            </p>
+      {/* Hero */}
+      <section
+        className="relative min-h-[88vh] flex flex-col justify-center overflow-hidden"
+        style={{ background: 'var(--ink)' }}
+      >
+        {/* Background grid lines */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(245,240,232,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(245,240,232,0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '80px 80px',
+          }}
+        />
 
-            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
-              <div className="relative flex items-center bg-white shadow-xl rounded-full border border-gray-100 overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 transition-all">
-                <Search className="w-5 h-5 text-gray-400 absolute left-5" />
-                <input 
-                  type="text" 
-                  className="w-full py-4 pl-14 pr-32 outline-none text-gray-700 bg-transparent placeholder-gray-400"
-                  placeholder="搜索品牌、案例或营销手法 (如: 母亲节)"
+        {/* Radial glow */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(201,168,76,0.06) 0%, transparent 70%)',
+          }}
+        />
+
+        <div className="container relative z-10 mx-auto px-6 lg:px-8 pt-20 pb-24">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0 }}
+              className="inline-flex items-center gap-2 mb-8"
+            >
+              <span
+                className="h-px w-8"
+                style={{ background: 'var(--gold)' }}
+              />
+              <span
+                className="text-xs font-mono-custom tracking-[0.2em] uppercase"
+                style={{ color: 'var(--gold)', fontFamily: 'DM Mono, monospace' }}
+              >
+                专属丫丫大王
+              </span>
+              <span
+                className="h-px w-8"
+                style={{ background: 'var(--gold)' }}
+              />
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="font-display mb-6 leading-[1.1]"
+              style={{
+                fontFamily: 'Playfair Display, serif',
+                fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+                fontWeight: 900,
+                color: 'var(--text-primary)',
+              }}
+            >
+              为你收集全世界的
+              <br />
+              <em
+                style={{
+                  fontStyle: 'italic',
+                  background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                营销灵感
+              </em>
+            </motion.h1>
+
+            {/* Subheading */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              丫丫大王，这里有全球最好的营销案例，
+              每一个都是我精心为你挑选的。
+              希望能给你带来一点点灵感，和很多很多的爱。
+            </motion.p>
+
+            {/* Search */}
+            <motion.form
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              onSubmit={handleSearch}
+              className="max-w-2xl mx-auto"
+            >
+              <div
+                className="flex items-center rounded-full overflow-hidden transition-all duration-300"
+                style={{
+                  border: '1px solid var(--border-warm)',
+                  background: 'rgba(245, 240, 232, 0.04)',
+                }}
+                onFocus={() => {}}
+              >
+                <svg
+                  className="ml-5 flex-shrink-0"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  className="flex-1 py-4 px-4 outline-none bg-transparent text-base"
+                  style={{
+                    color: 'var(--text-primary)',
+                    caretColor: 'var(--gold)',
+                  }}
+                  placeholder="丫丫大王想找什么灵感？"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button 
+                <button
                   type="submit"
-                  className="absolute right-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-full transition-colors"
+                  className="mr-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 hover:opacity-90 active:scale-95"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--gold-light), var(--gold))',
+                    color: 'var(--ink)',
+                  }}
                 >
                   搜索
                 </button>
               </div>
-              <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm text-gray-500">
-                <span>热门搜索:</span>
-                <Link to="/cases?q=瑞幸" className="hover:text-indigo-600 transition-colors">瑞幸联名</Link>
-                <Link to="/cases?q=Nike" className="hover:text-indigo-600 transition-colors">Nike</Link>
-                <Link to="/cases?type=video_ad" className="hover:text-indigo-600 transition-colors">视频广告</Link>
+
+              <div className="mt-4 flex flex-wrap justify-center items-center gap-x-3 gap-y-2">
+                <span
+                  className="text-xs"
+                  style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}
+                >
+                  热门:
+                </span>
+                {HOT_SEARCHES.map((s) => (
+                  <Link
+                    key={s.href}
+                    to={s.href}
+                    className="text-xs px-3 py-1 rounded-full border transition-all duration-200 hover:border-opacity-60"
+                    style={{
+                      color: 'var(--text-secondary)',
+                      borderColor: 'var(--border)',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.color = 'var(--gold)';
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-warm)';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                    }}
+                  >
+                    {s.label}
+                  </Link>
+                ))}
               </div>
-            </form>
-          </motion.div>
+            </motion.form>
+          </div>
         </div>
+
+        {/* Bottom fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, transparent, var(--ink))' }}
+        />
       </section>
 
       {/* Featured Section */}
-      <section id="featured-cases" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <h2 className="text-3xl font-bold flex items-center gap-2 text-gray-900 mb-2">
-                <Sparkles className="text-amber-500" />
-                编辑精选
-              </h2>
-              <p className="text-gray-500">深入解析最具影响力和创意水准的顶尖案例</p>
-            </div>
-            <Link to="/cases" className="hidden sm:flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-medium">
-              查看全部 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredCases.map((caseItem, idx) => (
-              <CaseCard key={caseItem.id} caseData={caseItem} index={idx} />
+      <section
+        id="featured-cases"
+        className="py-24"
+        style={{ background: 'var(--ink-soft)' }}
+      >
+        <div className="container mx-auto px-6 lg:px-8">
+          <SectionHeader
+            label="编辑精选"
+            title="顶尖案例"
+            subtitle="为丫丫大王精心挑选，最具影响力和创意水准的顶尖案例"
+            href="/cases"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredCases.map((c, i) => (
+              <CaseCard key={c.id} caseData={c} index={i} />
             ))}
           </div>
         </div>
       </section>
 
       {/* Trending Section */}
-      <section id="trending-cases" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <h2 className="text-3xl font-bold flex items-center gap-2 text-gray-900 mb-2">
-                <TrendingUp className="text-rose-500" />
-                热度飙升
-              </h2>
-              <p className="text-gray-500">全网互动量最高、最具讨论度的话题案例</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {trendingCases.map((caseItem, idx) => (
-              <CaseCard key={`trending-${caseItem.id}`} caseData={caseItem} index={idx} />
+      <section
+        id="trending-cases"
+        className="py-24"
+        style={{ background: 'var(--ink)' }}
+      >
+        <div className="container mx-auto px-6 lg:px-8">
+          <SectionHeader
+            label="热度飙升"
+            title="热门案例"
+            subtitle="丫丫大王，这些是全网最火的，你一定会喜欢的"
+            href="/cases?order=engagement_score"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {trendingCases.map((c, i) => (
+              <CaseCard key={`trending-${c.id}`} caseData={c} index={i} />
             ))}
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function SectionHeader({
+  label,
+  title,
+  subtitle,
+  href,
+}: {
+  label: string;
+  title: string;
+  subtitle: string;
+  href: string;
+}) {
+  return (
+    <div className="flex items-end justify-between mb-12">
+      <div>
+        <div
+          className="flex items-center gap-2 mb-3"
+        >
+          <span
+            className="h-px w-6"
+            style={{ background: 'var(--gold)' }}
+          />
+          <span
+            className="text-xs tracking-[0.2em] uppercase"
+            style={{ color: 'var(--gold)', fontFamily: 'DM Mono, monospace' }}
+          >
+            {label}
+          </span>
+        </div>
+        <h2
+          className="text-3xl md:text-4xl font-bold mb-2"
+          style={{
+            fontFamily: 'Playfair Display, serif',
+            color: 'var(--text-primary)',
+          }}
+        >
+          {title}
+        </h2>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          {subtitle}
+        </p>
+      </div>
+      <Link
+        to={href}
+        className="hidden sm:flex items-center gap-2 text-sm font-medium transition-colors duration-200 group"
+        style={{ color: 'var(--text-muted)' }}
+        onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--gold)')}
+        onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}
+      >
+        查看全部
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="transition-transform duration-200 group-hover:translate-x-1"
+        >
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </Link>
     </div>
   );
 }
