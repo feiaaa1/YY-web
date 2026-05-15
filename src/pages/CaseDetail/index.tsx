@@ -17,10 +17,10 @@ const FUNNEL_MAP: Record<string, string> = {
   conversion: '转化行动',
 };
 
-const FUNNEL_COLOR: Record<string, string> = {
-  awareness: 'bg-sky-50 text-sky-700 border-sky-200',
-  consideration: 'bg-violet-50 text-violet-700 border-violet-200',
-  conversion: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+const FUNNEL_STYLE: Record<string, React.CSSProperties> = {
+  awareness: { background: 'rgba(255,105,180,0.12)', color: '#FF69B4', border: '1px solid rgba(255,105,180,0.3)' },
+  consideration: { background: 'rgba(75,0,130,0.2)', color: '#c4a0e0', border: '1px solid rgba(75,0,130,0.4)' },
+  conversion: { background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid var(--border-warm)' },
 };
 
 function ScoreRing({ value, label, color }: { value: number; label: string; color: string }) {
@@ -31,7 +31,7 @@ function ScoreRing({ value, label, color }: { value: number; label: string; colo
     <div className="flex flex-col items-center gap-2">
       <div className="relative w-24 h-24">
         <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-          <circle cx="48" cy="48" r={r} strokeWidth="8" className="stroke-gray-100" fill="none" />
+          <circle cx="48" cy="48" r={r} strokeWidth="8" stroke="var(--border)" fill="none" />
           <circle
             cx="48" cy="48" r={r} strokeWidth="8" fill="none"
             stroke={color} strokeLinecap="round"
@@ -40,31 +40,31 @@ function ScoreRing({ value, label, color }: { value: number; label: string; colo
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-black text-gray-900">{value ?? '-'}</span>
+          <span className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{value ?? '-'}</span>
         </div>
       </div>
-      <span className="text-sm font-semibold text-gray-500">{label}</span>
+      <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{label}</span>
     </div>
   );
 }
 
 function TagPill({ children, variant = 'gray' }: { children: React.ReactNode; variant?: 'gray' | 'indigo' | 'rose' | 'amber' | 'teal' }) {
-  const cls = {
-    gray: 'bg-gray-100 text-gray-700',
-    indigo: 'bg-indigo-50 text-indigo-700',
-    rose: 'bg-rose-50 text-rose-700',
-    amber: 'bg-amber-50 text-amber-700',
-    teal: 'bg-teal-50 text-teal-700',
-  }[variant];
-  return <span className={`px-3 py-1 rounded-full text-xs font-semibold ${cls}`}>{children}</span>;
+  const styles: Record<string, React.CSSProperties> = {
+    gray: { background: 'var(--ink-muted)', color: 'var(--text-secondary)', border: '1px solid var(--border)' },
+    indigo: { background: 'rgba(75,0,130,0.15)', color: '#c4a0e0', border: '1px solid rgba(75,0,130,0.3)' },
+    rose: { background: 'rgba(244,63,94,0.12)', color: '#fda4af', border: '1px solid rgba(244,63,94,0.25)' },
+    amber: { background: 'rgba(201,168,76,0.12)', color: 'var(--gold-light)', border: '1px solid var(--border-warm)' },
+    teal: { background: 'rgba(20,184,166,0.12)', color: '#5eead4', border: '1px solid rgba(20,184,166,0.25)' },
+  };
+  return <span className="px-3 py-1 rounded-full text-xs font-semibold" style={styles[variant]}>{children}</span>;
 }
 
 function SectionCard({ id, title, icon, children }: { id: string; title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section id={id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-3 px-7 py-5 border-b border-gray-100">
-        <span className="text-indigo-600">{icon}</span>
-        <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+    <section id={id} className="rounded-2xl overflow-hidden" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border)' }}>
+      <div className="flex items-center gap-3 px-7 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
+        <span style={{ color: 'var(--gold)' }}>{icon}</span>
+        <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>{title}</h2>
       </div>
       <div className="px-7 py-6">{children}</div>
     </section>
@@ -96,17 +96,17 @@ export default function CaseDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--ink)' }}>
+        <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--gold)', borderTopColor: 'transparent' }} />
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">找不到该案例</h2>
-        <Link to="/cases" className="text-indigo-600 hover:underline font-medium">← 返回案例库</Link>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: 'var(--ink)' }}>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>找不到该案例</h2>
+        <Link to="/cases" className="text-sm font-medium" style={{ color: 'var(--gold)' }}>← 返回案例库</Link>
       </div>
     );
   }
@@ -118,13 +118,13 @@ export default function CaseDetailPage() {
   const rawText = (data as unknown as Record<string, unknown>)['raw_text'] as string | undefined;
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen" style={{ background: 'var(--ink)' }}>
 
       {/* ① Header / Hero */}
       <section id="hero">
         {/* Cover */}
         {primaryMedia && (
-          <div className="w-full h-64 md:h-96 bg-gray-200 overflow-hidden relative">
+          <div className="w-full h-64 md:h-96 overflow-hidden relative" style={{ background: 'var(--ink-muted)' }}>
             <img
               src={primaryMedia}
               alt={data.title}
@@ -132,14 +132,17 @@ export default function CaseDetailPage() {
               className="w-full h-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,0,24,0.6) 0%, rgba(13,0,24,0.1) 50%, transparent 100%)' }} />
           </div>
         )}
 
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Back nav */}
           <div className="pt-6 pb-2">
-            <Link to="/cases" className="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 transition-colors">
+            <Link to="/cases" className="inline-flex items-center text-sm transition-colors" style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--gold)')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}
+            >
               <ArrowLeft className="w-4 h-4 mr-1" /> 返回案例库
             </Link>
           </div>
@@ -147,43 +150,43 @@ export default function CaseDetailPage() {
           <div className="pb-10 pt-4">
             {/* Badges */}
             <div className="flex flex-wrap gap-2 mb-5">
-              <span className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full">
+              <span className="px-3 py-1 text-xs font-bold rounded-full" style={{ background: 'var(--gold)', color: 'var(--ink)' }}>
                 {CATEGORY_MAP[data.content_type] || data.content_type}
               </span>
-              <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full flex items-center gap-1">
+              <span className="px-3 py-1 text-xs font-bold rounded-full flex items-center gap-1" style={{ background: 'var(--ink-muted)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
                 <MapPin className="w-3 h-3" /> {REGION_MAP[data.region] || data.region}
                 {data.country && ` · ${data.country}`}
               </span>
               {data.is_featured && (
-                <span className="px-3 py-1 bg-amber-400 text-white text-xs font-bold rounded-full flex items-center gap-1">
+                <span className="px-3 py-1 text-xs font-bold rounded-full flex items-center gap-1" style={{ background: 'linear-gradient(135deg, var(--gold-light), var(--gold))', color: 'var(--ink)' }}>
                   <Sparkles className="w-3 h-3" /> 精选
                 </span>
               )}
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-2" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>
               {data.title_cn || data.title}
             </h1>
             {data.title_cn && (
-              <p className="text-lg text-gray-500 mb-6">{data.title}</p>
+              <p className="text-lg mb-6" style={{ color: 'var(--text-secondary)' }}>{data.title}</p>
             )}
 
             {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-5 text-sm text-gray-500 mb-8">
+            <div className="flex flex-wrap items-center gap-5 text-sm mb-8" style={{ color: 'var(--text-secondary)' }}>
               {/* Brand */}
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full border overflow-hidden flex items-center justify-center flex-shrink-0" style={{ background: 'var(--ink-muted)', borderColor: 'var(--border)' }}>
                   {data.brand?.logo_url ? (
                     <img src={data.brand.logo_url} alt="" referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   ) : (
-                    <span className="text-sm font-bold text-gray-400">{brandFirstChar}</span>
+                    <span className="text-sm font-bold" style={{ color: 'var(--gold)' }}>{brandFirstChar}</span>
                   )}
                 </div>
-                <span className="font-semibold text-gray-800">{data.brand_name ?? data.brand?.name ?? '未知品牌'}</span>
-                {data.brand?.industry && <span className="text-gray-400">· {data.brand.industry}</span>}
+                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{data.brand_name ?? data.brand?.name ?? '未知品牌'}</span>
+                {data.brand?.industry && <span style={{ color: 'var(--text-muted)' }}>· {data.brand.industry}</span>}
               </div>
 
               {data.published_at && (
@@ -194,14 +197,15 @@ export default function CaseDetailPage() {
               )}
 
               {(data.source?.name_cn || data.source?.name) && (
-                <span>来自 <span className="font-medium text-gray-700">{data.source.name_cn || data.source.name}</span></span>
+                <span>来自 <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>{data.source.name_cn || data.source.name}</span></span>
               )}
 
               <a
                 href={data.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, var(--gold-light), var(--gold))', color: 'var(--ink)' }}
               >
                 查看原文 <ExternalLink className="w-4 h-4" />
               </a>
@@ -209,7 +213,7 @@ export default function CaseDetailPage() {
 
             {/* Summary */}
             {data.summary && (
-              <p className="text-lg text-gray-600 leading-relaxed border-l-4 border-indigo-400 pl-5">
+              <p className="text-lg leading-relaxed pl-5" style={{ color: 'var(--text-secondary)', borderLeft: '3px solid var(--gold)' }}>
                 {data.summary}
               </p>
             )}
@@ -222,7 +226,7 @@ export default function CaseDetailPage() {
 
         {/* ② Core Metrics */}
         <section id="metrics">
-          <div className="bg-gradient-to-br from-indigo-900 to-indigo-950 rounded-2xl p-8 text-white">
+          <div className="rounded-2xl p-8" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border-warm)' }}>
             <div className="flex flex-wrap items-center justify-around gap-8">
               {/* Scores */}
               {analysis && (
@@ -235,36 +239,36 @@ export default function CaseDetailPage() {
               {/* Engagement */}
               <div className="flex gap-6">
                 <div className="text-center">
-                  <Eye className="w-5 h-5 mx-auto mb-1 text-indigo-300" />
-                  <div className="text-2xl font-black">
+                  <Eye className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--text-secondary)' }} />
+                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
                     {data.engagement_views != null
                       ? data.engagement_views >= 10000
                         ? `${(data.engagement_views / 10000).toFixed(1)}W`
                         : data.engagement_views.toLocaleString()
                       : '-'}
                   </div>
-                  <div className="text-xs text-indigo-300 font-medium mt-0.5">播放量</div>
+                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>播放量</div>
                 </div>
                 <div className="text-center">
-                  <Heart className="w-5 h-5 mx-auto mb-1 text-rose-400" />
-                  <div className="text-2xl font-black">
+                  <Heart className="w-5 h-5 mx-auto mb-1" style={{ color: '#fda4af' }} />
+                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
                     {data.engagement_likes != null
                       ? data.engagement_likes >= 10000
                         ? `${(data.engagement_likes / 10000).toFixed(1)}W`
                         : data.engagement_likes.toLocaleString()
                       : '-'}
                   </div>
-                  <div className="text-xs text-indigo-300 font-medium mt-0.5">点赞数</div>
+                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>点赞数</div>
                 </div>
                 <div className="text-center">
-                  <MessageCircle className="w-5 h-5 mx-auto mb-1 text-sky-400" />
-                  <div className="text-2xl font-black">{data.engagement_comments ?? '-'}</div>
-                  <div className="text-xs text-indigo-300 font-medium mt-0.5">评论数</div>
+                  <MessageCircle className="w-5 h-5 mx-auto mb-1" style={{ color: '#7dd3fc' }} />
+                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_comments ?? '-'}</div>
+                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>评论数</div>
                 </div>
                 <div className="text-center">
-                  <Share2 className="w-5 h-5 mx-auto mb-1 text-emerald-400" />
-                  <div className="text-2xl font-black">{data.engagement_shares ?? '-'}</div>
-                  <div className="text-xs text-indigo-300 font-medium mt-0.5">分享数</div>
+                  <Share2 className="w-5 h-5 mx-auto mb-1" style={{ color: '#6ee7b7' }} />
+                  <div className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_shares ?? '-'}</div>
+                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>分享数</div>
                 </div>
               </div>
             </div>
@@ -277,7 +281,7 @@ export default function CaseDetailPage() {
             {/* Virality reasons — visual hero */}
             {analysis.virality_reasons?.length > 0 && (
               <div className="mb-7">
-                <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4">核心出圈原因</p>
+                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#FF69B4' }}>核心出圈原因</p>
                 <div className="space-y-3">
                   {analysis.virality_reasons.map((r, i) => (
                     <motion.div
@@ -285,12 +289,13 @@ export default function CaseDetailPage() {
                       initial={{ opacity: 0, x: -12 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.08 }}
-                      className="flex items-start gap-4 bg-gradient-to-r from-indigo-50 to-transparent rounded-xl p-4 border border-indigo-100"
+                      className="flex items-start gap-4 rounded-xl p-4"
+                      style={{ background: 'rgba(75,0,130,0.1)', border: '1px solid rgba(75,0,130,0.25)' }}
                     >
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 text-white text-sm font-black flex items-center justify-center">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full text-sm font-black flex items-center justify-center" style={{ background: 'var(--gold)', color: 'var(--ink)' }}>
                         {i + 1}
                       </span>
-                      <p className="text-gray-800 font-medium leading-relaxed">{r}</p>
+                      <p className="font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>{r}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -300,7 +305,7 @@ export default function CaseDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {analysis.emotional_triggers?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">情感触点</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>情感触点</p>
                   <div className="flex flex-wrap gap-2">
                     {analysis.emotional_triggers.map((t, i) => <TagPill key={i} variant="rose">{t}</TagPill>)}
                   </div>
@@ -308,7 +313,7 @@ export default function CaseDetailPage() {
               )}
               {analysis.spread_mechanism?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">传播机制</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>传播机制</p>
                   <div className="flex flex-wrap gap-2">
                     {analysis.spread_mechanism.map((t, i) => <TagPill key={i} variant="indigo">{t}</TagPill>)}
                   </div>
@@ -316,7 +321,7 @@ export default function CaseDetailPage() {
               )}
               {analysis.timing_factors?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">时机因素</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>时机因素</p>
                   <div className="flex flex-wrap gap-2">
                     {analysis.timing_factors.map((t, i) => <TagPill key={i} variant="amber">{t}</TagPill>)}
                   </div>
@@ -332,7 +337,7 @@ export default function CaseDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {analysis.creative_technique?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">创意手法</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>创意手法</p>
                   <div className="flex flex-wrap gap-2">
                     {analysis.creative_technique.map((t, i) => <TagPill key={i} variant="teal">{t}</TagPill>)}
                   </div>
@@ -340,20 +345,20 @@ export default function CaseDetailPage() {
               )}
               {analysis.hook_type && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">钩子类型</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>钩子类型</p>
                   <TagPill variant="rose">{analysis.hook_type}</TagPill>
                 </div>
               )}
               {analysis.differentiation && (
                 <div className="md:col-span-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">差异化卖点</p>
-                  <p className="text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-100">{analysis.differentiation}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>差异化卖点</p>
+                  <p className="text-sm leading-relaxed rounded-xl p-4" style={{ color: 'var(--text-secondary)', background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>{analysis.differentiation}</p>
                 </div>
               )}
               {analysis.platform_fit_reason && (
                 <div className="md:col-span-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">平台适配原因</p>
-                  <p className="text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-100">{analysis.platform_fit_reason}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>平台适配原因</p>
+                  <p className="text-sm leading-relaxed rounded-xl p-4" style={{ color: 'var(--text-secondary)', background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>{analysis.platform_fit_reason}</p>
                 </div>
               )}
             </div>
@@ -366,7 +371,7 @@ export default function CaseDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {analysis.target_audience?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">目标人群</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>目标人群</p>
                   <div className="flex flex-wrap gap-2">
                     {analysis.target_audience.map((t, i) => <TagPill key={i}>{t}</TagPill>)}
                   </div>
@@ -374,16 +379,16 @@ export default function CaseDetailPage() {
               )}
               {analysis.funnel_stage && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">漏斗阶段</p>
-                  <span className={`px-4 py-2 rounded-xl text-sm font-bold border ${FUNNEL_COLOR[analysis.funnel_stage] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>漏斗阶段</p>
+                  <span className="px-4 py-2 rounded-xl text-sm font-bold" style={FUNNEL_STYLE[analysis.funnel_stage] || { background: 'var(--ink-muted)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
                     {FUNNEL_MAP[analysis.funnel_stage] || analysis.funnel_stage}
                   </span>
                 </div>
               )}
               {analysis.cta_strategy && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">CTA 策略</p>
-                  <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 rounded-xl p-3 border border-gray-100">{analysis.cta_strategy}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>CTA 策略</p>
+                  <p className="text-sm leading-relaxed rounded-xl p-3" style={{ color: 'var(--text-secondary)', background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>{analysis.cta_strategy}</p>
                 </div>
               )}
             </div>
@@ -396,12 +401,12 @@ export default function CaseDetailPage() {
             {/* Key takeaways — hero layout */}
             {analysis.key_takeaways?.length > 0 && (
               <div className="mb-8">
-                <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">关键启示</p>
+                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--gold)' }}>关键启示</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {analysis.key_takeaways.map((t, i) => (
-                    <div key={i} className="flex items-start gap-3 bg-amber-50 rounded-xl p-4 border border-amber-100">
-                      <Lightbulb className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-gray-800 text-sm leading-relaxed">{t}</p>
+                    <div key={i} className="flex items-start gap-3 rounded-xl p-4" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid var(--border-warm)' }}>
+                      <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--gold)' }} />
+                      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{t}</p>
                     </div>
                   ))}
                 </div>
@@ -411,7 +416,7 @@ export default function CaseDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {analysis.applicable_industries?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">适用行业</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>适用行业</p>
                   <div className="flex flex-wrap gap-2">
                     {analysis.applicable_industries.map((t, i) => <TagPill key={i} variant="indigo">{t}</TagPill>)}
                   </div>
@@ -419,7 +424,7 @@ export default function CaseDetailPage() {
               )}
               {analysis.applicable_scenarios?.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">适用场景</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>适用场景</p>
                   <div className="flex flex-wrap gap-2">
                     {analysis.applicable_scenarios.map((t, i) => <TagPill key={i} variant="teal">{t}</TagPill>)}
                   </div>
@@ -427,10 +432,10 @@ export default function CaseDetailPage() {
               )}
               {analysis.replicability_notes && (
                 <div className="md:col-span-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">可复制性说明</p>
-                  <div className="flex items-start gap-3 bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <Copy className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-gray-700 text-sm leading-relaxed">{analysis.replicability_notes}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>可复制性说明</p>
+                  <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>
+                    <Copy className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--text-muted)' }} />
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{analysis.replicability_notes}</p>
                   </div>
                 </div>
               )}
@@ -445,7 +450,7 @@ export default function CaseDetailPage() {
             {mediaGallery.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 {mediaGallery.map((url, i) => (
-                  <div key={i} className="aspect-square rounded-xl overflow-hidden bg-gray-100">
+                  <div key={i} className="aspect-square rounded-xl overflow-hidden" style={{ background: 'var(--ink-muted)' }}>
                     <img
                       src={url}
                       alt={`媒体素材 ${i + 2}`}
@@ -462,12 +467,13 @@ export default function CaseDetailPage() {
             {/* Raw text collapsible */}
             {rawText && (
               <div>
-                <div className={`text-gray-700 text-sm leading-relaxed overflow-hidden transition-all duration-300 ${rawExpanded ? '' : 'max-h-32'}`}>
+                <div className={`text-sm leading-relaxed overflow-hidden transition-all duration-300 ${rawExpanded ? '' : 'max-h-32'}`} style={{ color: 'var(--text-secondary)' }}>
                   <p className="whitespace-pre-wrap">{rawText}</p>
                 </div>
                 <button
                   onClick={() => setRawExpanded(v => !v)}
-                  className="mt-3 flex items-center gap-1 text-indigo-600 text-sm font-semibold hover:underline"
+                  className="mt-3 flex items-center gap-1 text-sm font-semibold hover:underline"
+                  style={{ color: 'var(--gold)' }}
                 >
                   {rawExpanded ? <><ChevronUp className="w-4 h-4" /> 收起</> : <><ChevronDown className="w-4 h-4" /> 展开全文</>}
                 </button>
@@ -480,17 +486,26 @@ export default function CaseDetailPage() {
         <section id="tags-related">
           {/* Tags */}
           {data.tags?.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 mb-6">
+            <div className="rounded-2xl p-7 mb-6" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border)' }}>
               <div className="flex items-center gap-2 mb-4">
-                <TagIcon className="w-4 h-4 text-indigo-600" />
-                <h2 className="text-base font-bold text-gray-900">标签</h2>
+                <TagIcon className="w-4 h-4" style={{ color: 'var(--gold)' }} />
+                <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>标签</h2>
               </div>
               <div className="flex flex-wrap gap-2">
                 {data.tags.map(({ tag }, i) => (
                   <Link
                     key={i}
                     to={`/cases?tag=${tag.name}`}
-                    className="px-3 py-1 bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 text-gray-700 text-xs font-semibold rounded-full transition-colors"
+                    className="px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200"
+                    style={{ background: 'var(--ink-muted)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.color = 'var(--gold)';
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-warm)';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                    }}
                   >
                     {tag.name_cn || tag.name}
                   </Link>
@@ -502,7 +517,7 @@ export default function CaseDetailPage() {
           {/* Related Cases */}
           {related.length > 0 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-5">相关案例</h2>
+              <h2 className="text-xl font-bold mb-5" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>相关案例</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {related.map((c, i) => (
                   <CaseCard key={c.id} caseData={c} index={i} />
