@@ -59,7 +59,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index =
             <span
               className="px-2.5 py-1 text-xs font-medium rounded-full"
               style={{
-                background: 'rgba(13, 0, 24, 0.75)',
+                background: 'color-mix(in srgb, var(--ink) 70%, transparent)',
                 color: 'var(--text-secondary)',
                 backdropFilter: 'blur(8px)',
                 border: '1px solid var(--border)',
@@ -88,7 +88,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index =
             <span
               className="text-xs font-mono-custom font-medium px-2 py-0.5 rounded"
               style={{
-                background: 'rgba(13,0,24,0.8)',
+                background: 'color-mix(in srgb, var(--ink) 80%, transparent)',
                 color: 'var(--gold)',
                 fontFamily: 'DM Mono, monospace',
                 backdropFilter: 'blur(8px)',
