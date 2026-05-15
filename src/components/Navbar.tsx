@@ -35,16 +35,11 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div
-              className="w-7 h-7 flex items-center justify-center text-xs font-bold transition-all duration-300 group-hover:scale-110"
-              style={{
-                background: 'linear-gradient(135deg, var(--gold), var(--gold-dim))',
-                color: 'var(--ink)',
-                clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-              }}
-            >
-              YY
-            </div>
+            <img
+              src="/icon_32x32.png"
+              alt="YY logo"
+              className="w-7 h-7 transition-all duration-300 group-hover:scale-110"
+            />
             <span className="font-display font-bold text-lg tracking-tight" style={{ color: 'var(--text-primary)' }}>
               营销案例库
             </span>
