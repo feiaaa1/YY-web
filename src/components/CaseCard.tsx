@@ -10,6 +10,12 @@ interface CaseCardProps {
   index?: number;
 }
 
+function formatCount(value?: number) {
+  if (value == null) return '-';
+  if (value >= 10000) return `${(value / 10000).toFixed(1)}W`;
+  return value.toLocaleString();
+}
+
 export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index = 0 }) => {
   const imageUrl =
     caseData.raw_media_urls?.[0] ||
@@ -82,21 +88,6 @@ export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index =
               </span>
             </div>
           )}
-
-          {/* Score overlay at bottom */}
-          <div className="absolute bottom-3 right-3">
-            <span
-              className="text-xs font-mono-custom font-medium px-2 py-0.5 rounded"
-              style={{
-                background: 'rgba(0,0,0,0.55)',
-                color: 'var(--gold)',
-                fontFamily: 'DM Mono, monospace',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              {caseData.quality_score}
-            </span>
-          </div>
         </div>
 
         {/* Content */}
@@ -113,7 +104,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index =
               className="text-xs"
               style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}
             >
-              ♥ {caseData.engagement_score?.toFixed(1) ?? '0.0'}
+              播放 {formatCount(caseData.engagement_views)}
             </span>
           </div>
 
@@ -125,7 +116,7 @@ export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index =
               fontFamily: 'Playfair Display, serif',
             }}
           >
-            {caseData.title}
+            {caseData.title_cn || caseData.title}
           </h3>
 
           {/* Summary */}

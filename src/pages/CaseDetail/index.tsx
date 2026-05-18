@@ -7,7 +7,7 @@ import { CATEGORY_MAP, REGION_MAP, formatDate } from '@/lib/utils';
 import { CaseCard } from '@/components/CaseCard';
 import {
   ArrowLeft, ExternalLink, Heart, MessageCircle, Share2, Eye,
-  Sparkles, Zap, Copy, Lightbulb, Target, Megaphone,
+  Sparkles, Megaphone,
   ChevronDown, ChevronUp, MapPin, Calendar, Tag as TagIcon
 } from 'lucide-react';
 
@@ -23,30 +23,14 @@ const FUNNEL_STYLE: Record<string, React.CSSProperties> = {
   conversion: { background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid var(--border-warm)' },
 };
 
-function ScoreRing({ value, label, color }: { value: number; label: string; color: string }) {
-  const r = 36;
-  const circ = 2 * Math.PI * r;
-  const fill = circ - (circ * (value ?? 0)) / 100;
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative w-24 h-24">
-        <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-          <circle cx="48" cy="48" r={r} strokeWidth="8" stroke="var(--border)" fill="none" />
-          <circle
-            cx="48" cy="48" r={r} strokeWidth="8" fill="none"
-            stroke={color} strokeLinecap="round"
-            strokeDasharray={circ} strokeDashoffset={fill}
-            style={{ transition: 'stroke-dashoffset 1s ease' }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{value ?? '-'}</span>
-        </div>
-      </div>
-      <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{label}</span>
-    </div>
-  );
-}
+type AnalysisTab = 'virality' | 'creative' | 'strategy' | 'takeaway';
+
+const ANALYSIS_TABS: { key: AnalysisTab; label: string }[] = [
+  { key: 'virality', label: '出圈原因分析' },
+  { key: 'creative', label: '创意拆解' },
+  { key: 'strategy', label: '营销策略' },
+  { key: 'takeaway', label: '可借鉴要素' },
+];
 
 function TagPill({ children, variant = 'gray' }: { children: React.ReactNode; variant?: 'gray' | 'indigo' | 'rose' | 'amber' | 'teal' }) {
   const styles: Record<string, React.CSSProperties> = {
@@ -57,6 +41,55 @@ function TagPill({ children, variant = 'gray' }: { children: React.ReactNode; va
     teal: { background: 'rgba(20,184,166,0.12)', color: '#5eead4', border: '1px solid rgba(20,184,166,0.25)' },
   };
   return <span className="px-3 py-1 rounded-full text-xs font-semibold" style={styles[variant]}>{children}</span>;
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>
+      {children}
+    </p>
+  );
+}
+
+function TagGroup({ items, variant = 'gray' }: { items?: string[] | null; variant?: 'gray' | 'indigo' | 'rose' | 'amber' | 'teal' }) {
+  if (!items?.length) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item, i) => <TagPill key={`${item}-${i}`} variant={variant}>{item}</TagPill>)}
+    </div>
+  );
+}
+
+function NumberedList({ items }: { items?: string[] | null }) {
+  if (!items?.length) return null;
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => (
+        <motion.div
+          key={`${item}-${i}`}
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.08 }}
+          className="flex items-start gap-4 rounded-xl p-4"
+          style={{ background: 'rgba(75,0,130,0.1)', border: '1px solid rgba(75,0,130,0.25)' }}
+        >
+          <span className="flex-shrink-0 w-7 h-7 rounded-full text-sm font-black flex items-center justify-center" style={{ background: 'var(--gold)', color: 'var(--ink)' }}>
+            {i + 1}
+          </span>
+          <p className="font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>{item}</p>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function DetailBlock({ children }: { children?: string | null }) {
+  if (!children) return null;
+  return (
+    <p className="text-sm md:text-base leading-7 whitespace-pre-wrap rounded-xl p-4" style={{ color: 'var(--text-secondary)', background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>
+      {children}
+    </p>
+  );
 }
 
 function SectionCard({ id, title, icon, children }: { id: string; title: string; icon: React.ReactNode; children: React.ReactNode }) {
@@ -77,6 +110,8 @@ export default function CaseDetailPage() {
   const [related, setRelated] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [rawExpanded, setRawExpanded] = useState(false);
+  const [rawLanguage, setRawLanguage] = useState<'cn' | 'original'>('cn');
+  const [activeAnalysisTab, setActiveAnalysisTab] = useState<AnalysisTab>('virality');
 
   useEffect(() => {
     const loadData = async () => {
@@ -115,7 +150,10 @@ export default function CaseDetailPage() {
   const primaryMedia = data.raw_media_urls?.[0];
   const mediaGallery = (data.raw_media_urls ?? []).slice(1, 5);
   const brandFirstChar = data.brand_name?.charAt(0) ?? data.brand?.name?.charAt(0) ?? '?';
-  const rawText = (data as unknown as Record<string, unknown>)['raw_text'] as string | undefined;
+  const rawTextCn = data.raw_text_cn?.trim();
+  const rawTextOriginal = data.raw_text?.trim();
+  const rawText = rawLanguage === 'cn' && rawTextCn ? rawTextCn : rawTextOriginal;
+  const hasRawLanguageSwitch = Boolean(rawTextCn && rawTextOriginal);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--ink)' }}>
@@ -224,20 +262,10 @@ export default function CaseDetailPage() {
       {/* Main Layout */}
       <div className="container mx-auto px-4 max-w-5xl pb-24 space-y-6">
 
-        {/* ② Core Metrics */}
+        {/* ② Engagement Metrics */}
         <section id="metrics">
           <div className="rounded-2xl p-5 md:p-8" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border-warm)' }}>
-            <div className="flex flex-wrap items-center justify-around gap-6 md:gap-8">
-              {/* Scores */}
-              {analysis && (
-                <>
-                  <ScoreRing value={analysis.virality_score} label="出圈指数" color="#818cf8" />
-                  <ScoreRing value={analysis.replicability_score} label="可复制性" color="#34d399" />
-                  <ScoreRing value={data.quality_score} label="质量评分" color="#fbbf24" />
-                </>
-              )}
-              {/* Engagement */}
-              <div className="flex gap-4 md:gap-6">
+            <div className="flex flex-wrap items-center justify-around gap-4 md:gap-8">
                 <div className="text-center">
                   <Eye className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--text-secondary)' }} />
                   <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
@@ -270,180 +298,153 @@ export default function CaseDetailPage() {
                   <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_shares ?? '-'}</div>
                   <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>分享数</div>
                 </div>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* ③ 出圈原因分析 */}
+        {/* ③ Analysis */}
         {analysis && (
-          <SectionCard id="virality" title="出圈原因分析" icon={<Zap className="w-5 h-5" />}>
-            {/* Virality reasons — visual hero */}
-            {analysis.virality_reasons?.length > 0 && (
-              <div className="mb-7">
-                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#FF69B4' }}>核心出圈原因</p>
-                <div className="space-y-3">
-                  {analysis.virality_reasons.map((r, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="flex items-start gap-4 rounded-xl p-4"
-                      style={{ background: 'rgba(75,0,130,0.1)', border: '1px solid rgba(75,0,130,0.25)' }}
-                    >
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full text-sm font-black flex items-center justify-center" style={{ background: 'var(--gold)', color: 'var(--ink)' }}>
-                        {i + 1}
-                      </span>
-                      <p className="font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>{r}</p>
-                    </motion.div>
-                  ))}
+          <SectionCard id="analysis" title="案例分析" icon={<Sparkles className="w-5 h-5" />}>
+            <div className="flex flex-wrap gap-2 mb-6" role="tablist" aria-label="案例分析模块">
+              {ANALYSIS_TABS.map((tab) => {
+                const active = activeAnalysisTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setActiveAnalysisTab(tab.key)}
+                    className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+                    style={{
+                      background: active ? 'linear-gradient(135deg, var(--gold-light), var(--gold))' : 'var(--ink-muted)',
+                      color: active ? 'var(--ink)' : 'var(--text-secondary)',
+                      border: active ? '1px solid var(--gold)' : '1px solid var(--border)',
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {activeAnalysisTab === 'virality' && (
+              <div className="space-y-7">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <FieldLabel>情感触点</FieldLabel>
+                    <TagGroup items={analysis.emotional_triggers} variant="rose" />
+                  </div>
+                  <div>
+                    <FieldLabel>传播机制</FieldLabel>
+                    <TagGroup items={analysis.spread_mechanism} variant="indigo" />
+                  </div>
+                </div>
+                <div>
+                  <FieldLabel>核心出圈原因</FieldLabel>
+                  <NumberedList items={analysis.virality_reasons} />
+                </div>
+                <div>
+                  <FieldLabel>详细分析</FieldLabel>
+                  <DetailBlock>{analysis.virality_detail}</DetailBlock>
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {analysis.emotional_triggers?.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>情感触点</p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.emotional_triggers.map((t, i) => <TagPill key={i} variant="rose">{t}</TagPill>)}
+            {activeAnalysisTab === 'creative' && (
+              <div className="space-y-7">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <FieldLabel>创意手法</FieldLabel>
+                    <TagGroup items={analysis.creative_technique} variant="teal" />
                   </div>
-                </div>
-              )}
-              {analysis.spread_mechanism?.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>传播机制</p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.spread_mechanism.map((t, i) => <TagPill key={i} variant="indigo">{t}</TagPill>)}
-                  </div>
-                </div>
-              )}
-              {analysis.timing_factors?.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>时机因素</p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.timing_factors.map((t, i) => <TagPill key={i} variant="amber">{t}</TagPill>)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </SectionCard>
-        )}
-
-        {/* ④ 创意拆解 */}
-        {analysis && (
-          <SectionCard id="creative" title="创意拆解" icon={<Sparkles className="w-5 h-5" />}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {analysis.creative_technique?.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>创意手法</p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.creative_technique.map((t, i) => <TagPill key={i} variant="teal">{t}</TagPill>)}
-                  </div>
-                </div>
-              )}
-              {analysis.hook_type && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>钩子类型</p>
-                  <TagPill variant="rose">{analysis.hook_type}</TagPill>
-                </div>
-              )}
-              {analysis.differentiation && (
-                <div className="md:col-span-2">
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>差异化卖点</p>
-                  <p className="text-sm leading-relaxed rounded-xl p-4" style={{ color: 'var(--text-secondary)', background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>{analysis.differentiation}</p>
-                </div>
-              )}
-              {analysis.platform_fit_reason && (
-                <div className="md:col-span-2">
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>平台适配原因</p>
-                  <p className="text-sm leading-relaxed rounded-xl p-4" style={{ color: 'var(--text-secondary)', background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>{analysis.platform_fit_reason}</p>
-                </div>
-              )}
-            </div>
-          </SectionCard>
-        )}
-
-        {/* ⑤ 营销策略 */}
-        {analysis && (
-          <SectionCard id="strategy" title="营销策略" icon={<Target className="w-5 h-5" />}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {analysis.target_audience?.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>目标人群</p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.target_audience.map((t, i) => <TagPill key={i}>{t}</TagPill>)}
-                  </div>
-                </div>
-              )}
-              {analysis.funnel_stage && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>漏斗阶段</p>
-                  <span className="px-4 py-2 rounded-xl text-sm font-bold" style={FUNNEL_STYLE[analysis.funnel_stage] || { background: 'var(--ink-muted)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-                    {FUNNEL_MAP[analysis.funnel_stage] || analysis.funnel_stage}
-                  </span>
-                </div>
-              )}
-              {analysis.cta_strategy && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>CTA 策略</p>
-                  <p className="text-sm leading-relaxed rounded-xl p-3" style={{ color: 'var(--text-secondary)', background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>{analysis.cta_strategy}</p>
-                </div>
-              )}
-            </div>
-          </SectionCard>
-        )}
-
-        {/* ⑥ 可借鉴要素 */}
-        {analysis && (
-          <SectionCard id="takeaways" title="可借鉴要素" icon={<Lightbulb className="w-5 h-5" />}>
-            {/* Key takeaways — hero layout */}
-            {analysis.key_takeaways?.length > 0 && (
-              <div className="mb-8">
-                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--gold)' }}>关键启示</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {analysis.key_takeaways.map((t, i) => (
-                    <div key={i} className="flex items-start gap-3 rounded-xl p-4" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid var(--border-warm)' }}>
-                      <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--gold)' }} />
-                      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{t}</p>
+                  {analysis.hook_type && (
+                    <div>
+                      <FieldLabel>钩子类型</FieldLabel>
+                      <TagPill variant="rose">{analysis.hook_type}</TagPill>
                     </div>
-                  ))}
+                  )}
+                </div>
+                {analysis.differentiation && (
+                  <div>
+                    <FieldLabel>差异化卖点</FieldLabel>
+                    <DetailBlock>{analysis.differentiation}</DetailBlock>
+                  </div>
+                )}
+                <div>
+                  <FieldLabel>详细分析</FieldLabel>
+                  <DetailBlock>{analysis.creative_detail}</DetailBlock>
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {analysis.applicable_industries?.length > 0 && (
+            {activeAnalysisTab === 'strategy' && (
+              <div className="space-y-7">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <FieldLabel>目标人群</FieldLabel>
+                    <TagGroup items={analysis.target_audience} />
+                  </div>
+                  {analysis.funnel_stage && (
+                    <div>
+                      <FieldLabel>漏斗阶段</FieldLabel>
+                      <span className="px-4 py-2 rounded-xl text-sm font-bold" style={FUNNEL_STYLE[analysis.funnel_stage] || { background: 'var(--ink-muted)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+                        {FUNNEL_MAP[analysis.funnel_stage] || analysis.funnel_stage}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <FieldLabel>时机因素</FieldLabel>
+                    <TagGroup items={analysis.timing_factors} variant="amber" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {analysis.cta_strategy && (
+                    <div>
+                      <FieldLabel>CTA 策略</FieldLabel>
+                      <DetailBlock>{analysis.cta_strategy}</DetailBlock>
+                    </div>
+                  )}
+                  {analysis.platform_fit_reason && (
+                    <div>
+                      <FieldLabel>平台适配原因</FieldLabel>
+                      <DetailBlock>{analysis.platform_fit_reason}</DetailBlock>
+                    </div>
+                  )}
+                </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>适用行业</p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.applicable_industries.map((t, i) => <TagPill key={i} variant="indigo">{t}</TagPill>)}
-                  </div>
+                  <FieldLabel>详细分析</FieldLabel>
+                  <DetailBlock>{analysis.strategy_detail}</DetailBlock>
                 </div>
-              )}
-              {analysis.applicable_scenarios?.length > 0 && (
+              </div>
+            )}
+
+            {activeAnalysisTab === 'takeaway' && (
+              <div className="space-y-7">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>适用场景</p>
-                  <div className="flex flex-wrap gap-2">
-                    {analysis.applicable_scenarios.map((t, i) => <TagPill key={i} variant="teal">{t}</TagPill>)}
+                  <FieldLabel>关键启示</FieldLabel>
+                  <NumberedList items={analysis.key_takeaways} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <FieldLabel>适用行业</FieldLabel>
+                    <TagGroup items={analysis.applicable_industries} variant="indigo" />
+                  </div>
+                  <div>
+                    <FieldLabel>适用场景</FieldLabel>
+                    <TagGroup items={analysis.applicable_scenarios} variant="teal" />
                   </div>
                 </div>
-              )}
-              {analysis.replicability_notes && (
-                <div className="md:col-span-2">
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>可复制性说明</p>
-                  <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: 'var(--ink-muted)', border: '1px solid var(--border)' }}>
-                    <Copy className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--text-muted)' }} />
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{analysis.replicability_notes}</p>
-                  </div>
+                <div>
+                  <FieldLabel>详细分析</FieldLabel>
+                  <DetailBlock>{analysis.takeaway_detail}</DetailBlock>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </SectionCard>
         )}
 
-        {/* ⑦ 原始内容 */}
+        {/* ④ 原始内容 */}
         {(rawText || mediaGallery.length > 0) && (
           <SectionCard id="raw-content" title="原始内容" icon={<Megaphone className="w-5 h-5" />}>
             {/* Gallery */}
@@ -467,6 +468,31 @@ export default function CaseDetailPage() {
             {/* Raw text collapsible */}
             {rawText && (
               <div>
+                {hasRawLanguageSwitch && (
+                  <div className="flex flex-wrap gap-2 mb-4" aria-label="原始内容语言切换">
+                    {[
+                      { key: 'cn' as const, label: '中文' },
+                      { key: 'original' as const, label: '原文' },
+                    ].map((option) => {
+                      const active = rawLanguage === option.key;
+                      return (
+                        <button
+                          key={option.key}
+                          type="button"
+                          onClick={() => setRawLanguage(option.key)}
+                          className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200"
+                          style={{
+                            background: active ? 'var(--gold)' : 'var(--ink-muted)',
+                            color: active ? 'var(--ink)' : 'var(--text-secondary)',
+                            border: active ? '1px solid var(--gold)' : '1px solid var(--border)',
+                          }}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className={`text-sm leading-relaxed overflow-hidden transition-all duration-300 ${rawExpanded ? '' : 'max-h-32'}`} style={{ color: 'var(--text-secondary)' }}>
                   <p className="whitespace-pre-wrap">{rawText}</p>
                 </div>

@@ -27,8 +27,8 @@ export default function CasesPage() {
     (searchParams.get('order') as
       | 'collected_at'
       | 'published_at'
-      | 'engagement_score'
-      | 'quality_score') || 'collected_at';
+      | 'engagement_views'
+      | 'engagement_likes') || 'collected_at';
 
   useEffect(() => {
     setPage(0);
@@ -214,8 +214,8 @@ export default function CasesPage() {
             {[
               { value: 'collected_at', label: '最新收录' },
               { value: 'published_at', label: '最新发布' },
-              { value: 'engagement_score', label: '互动量最高' },
-              { value: 'quality_score', label: '质量分最高' },
+              { value: 'engagement_views', label: '播放量最高' },
+              { value: 'engagement_likes', label: '点赞数最高' },
             ].map((opt) => (
               <FilterOption key={opt.value} label={opt.label} checked={currentOrder === opt.value} onChange={() => updateFilter('order', opt.value)} />
             ))}
@@ -276,8 +276,8 @@ export default function CasesPage() {
                 {[
                   { value: 'collected_at', label: '最新收录' },
                   { value: 'published_at', label: '最新发布' },
-                  { value: 'engagement_score', label: '互动量最高' },
-                  { value: 'quality_score', label: '质量分最高' },
+                  { value: 'engagement_views', label: '播放量最高' },
+                  { value: 'engagement_likes', label: '点赞数最高' },
                 ].map((opt) => (
                   <FilterOption key={opt.value} label={opt.label} checked={currentOrder === opt.value} onChange={() => updateFilter('order', opt.value)} />
                 ))}

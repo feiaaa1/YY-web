@@ -8,7 +8,7 @@ export const api = {
     content_type?: string;
     brand_name?: string;
     is_featured?: boolean;
-    order?: 'collected_at' | 'engagement_score' | 'quality_score' | 'published_at';
+    order?: 'collected_at' | 'published_at' | 'engagement_views' | 'engagement_likes';
     limit?: number;
     offset?: number;
     search?: string;
@@ -19,7 +19,7 @@ export const api = {
         .select(
           `id, title, title_cn, summary, content_type, source_url, brand_name,
            published_at, collected_at, region, language, country,
-           engagement_likes, engagement_views, engagement_score, quality_score,
+           engagement_likes, engagement_comments, engagement_shares, engagement_views,
            is_featured, raw_media_urls,
            source:sources(id, name, name_cn),
            brand:brands(id, name, logo_url, industry)`,
@@ -31,7 +31,7 @@ export const api = {
       if (params?.is_featured) query = query.eq('is_featured', true);
       if (params?.search) {
         const q = params.search;
-        query = query.or(`title.ilike.%${q}%,raw_text.ilike.%${q}%`);
+        query = query.or(`title.ilike.%${q}%,title_cn.ilike.%${q}%,summary.ilike.%${q}%,raw_text.ilike.%${q}%,raw_text_cn.ilike.%${q}%`);
       }
 
       if (params?.order) {
@@ -63,7 +63,13 @@ export const api = {
       results = results.filter(c => c.title.toLowerCase().includes(q) || (c.summary ?? '').toLowerCase().includes(q));
     }
     if (params?.order) {
-      results.sort((a, b) => ((b[params.order!] as number) ?? 0) - ((a[params.order!] as number) ?? 0));
+      results.sort((a, b) => {
+        const order = params.order!;
+        if (order === 'collected_at' || order === 'published_at') {
+          return new Date((b[order] as string | null | undefined) ?? 0).getTime() - new Date((a[order] as string | null | undefined) ?? 0).getTime();
+        }
+        return ((b[order] as number | undefined) ?? 0) - ((a[order] as number | undefined) ?? 0);
+      });
     }
     return { data: results, count: results.length };
   },
@@ -77,12 +83,12 @@ export const api = {
           source:sources(id, name, name_cn, url),
           brand:brands(id, name, name_cn, logo_url, industry),
           analysis:case_analysis(
-            virality_score, virality_reasons,
+            virality_reasons, virality_detail,
             emotional_triggers, spread_mechanism, creative_technique,
             target_audience, timing_factors,
             hook_type, funnel_stage, differentiation,
+            creative_detail, strategy_detail, takeaway_detail,
             key_takeaways, applicable_industries, applicable_scenarios,
-            replicability_score, replicability_notes,
             platform_fit_reason, cta_strategy, confidence_score,
             model_used, analysis_version, case_id, created_at
           ),
@@ -108,10 +114,10 @@ export const api = {
     try {
       const { data, error } = await supabase
         .from('cases')
-        .select(`id, title, title_cn, summary, brand_name, raw_media_urls, content_type, region, quality_score, engagement_score, is_featured, source_url, published_at`)
+        .select(`id, title, title_cn, summary, brand_name, raw_media_urls, content_type, region, engagement_likes, engagement_comments, engagement_shares, engagement_views, is_featured, source_url, published_at, collected_at`)
         .eq('content_type', contentType)
         .neq('id', caseId)
-        .order('quality_score', { ascending: false })
+        .order('published_at', { ascending: false })
         .limit(limit);
       if (!error && data) return data as unknown as Case[];
       console.warn('Supabase getRelatedCases error:', error?.message);

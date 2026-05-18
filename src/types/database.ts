@@ -47,9 +47,9 @@ export interface Case {
   engagement_shares?: number;
   engagement_views?: number;
   engagement_saves?: number;
-  engagement_score: number;
-  quality_score: number;
   is_featured?: boolean;
+  raw_text?: string | null;
+  raw_text_cn?: string | null;
   raw_media_urls: string[] | null;
   metadata?: Record<string, unknown>;
   // joined relations
@@ -70,10 +70,11 @@ export interface CaseAnalysis {
   cta_strategy: string | null;
   funnel_stage: FunnelStage | null;
   differentiation: string | null;
-  virality_score: number;
   virality_reasons: string[];
-  replicability_score: number;
-  replicability_notes: string | null;
+  virality_detail: string | null;
+  creative_detail: string | null;
+  strategy_detail: string | null;
+  takeaway_detail: string | null;
   key_takeaways: string[];
   applicable_industries: string[];
   applicable_scenarios: string[];

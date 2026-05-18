@@ -21,8 +21,8 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       const [featured, trending] = await Promise.all([
-        api.getCases({ is_featured: true, order: 'quality_score', limit: 3 }),
-        api.getCases({ order: 'engagement_score', limit: 6 }),
+        api.getCases({ is_featured: true, order: 'published_at', limit: 3 }),
+        api.getCases({ order: 'engagement_views', limit: 6 }),
       ]);
       setFeaturedCases(featured.data);
       setTrendingCases(trending.data);
@@ -257,7 +257,7 @@ export default function HomePage() {
             label="热度飙升"
             title="热门案例"
             subtitle="丫丫大王，这些是全网最火的，你一定会喜欢的"
-            href="/cases?order=engagement_score"
+            href="/cases?order=engagement_views"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trendingCases.map((c, i) => (
