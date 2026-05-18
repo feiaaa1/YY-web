@@ -262,46 +262,6 @@ export default function CaseDetailPage() {
       {/* Main Layout */}
       <div className="container mx-auto px-4 max-w-5xl pb-24 space-y-6">
 
-        {/* ② Engagement Metrics */}
-        <section id="metrics">
-          <div className="rounded-2xl p-5 md:p-8" style={{ background: 'var(--ink-soft)', border: '1px solid var(--border-warm)' }}>
-            <div className="flex flex-wrap items-center justify-around gap-4 md:gap-8">
-                <div className="text-center">
-                  <Eye className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--text-secondary)' }} />
-                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-                    {data.engagement_views != null
-                      ? data.engagement_views >= 10000
-                        ? `${(data.engagement_views / 10000).toFixed(1)}W`
-                        : data.engagement_views.toLocaleString()
-                      : '-'}
-                  </div>
-                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>播放量</div>
-                </div>
-                <div className="text-center">
-                  <Heart className="w-5 h-5 mx-auto mb-1" style={{ color: '#fda4af' }} />
-                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-                    {data.engagement_likes != null
-                      ? data.engagement_likes >= 10000
-                        ? `${(data.engagement_likes / 10000).toFixed(1)}W`
-                        : data.engagement_likes.toLocaleString()
-                      : '-'}
-                  </div>
-                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>点赞数</div>
-                </div>
-                <div className="text-center">
-                  <MessageCircle className="w-5 h-5 mx-auto mb-1" style={{ color: '#7dd3fc' }} />
-                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_comments ?? '-'}</div>
-                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>评论数</div>
-                </div>
-                <div className="text-center">
-                  <Share2 className="w-5 h-5 mx-auto mb-1" style={{ color: '#6ee7b7' }} />
-                  <div className="text-xl md:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>{data.engagement_shares ?? '-'}</div>
-                  <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>分享数</div>
-                </div>
-            </div>
-          </div>
-        </section>
-
         {/* ③ Analysis */}
         {analysis && (
           <SectionCard id="analysis" title="案例分析" icon={<Sparkles className="w-5 h-5" />}>
