@@ -2,12 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn, CATEGORY_MAP, REGION_MAP } from '@/lib/utils';
 import { Case } from '@/types/database';
-import { motion } from 'framer-motion';
 
 interface CaseCardProps {
   caseData: Case;
   className?: string;
-  index?: number;
+  onOpen?: (caseId: string) => void;
 }
 
 function formatCount(value?: number) {
@@ -16,19 +15,16 @@ function formatCount(value?: number) {
   return value.toLocaleString();
 }
 
-export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index = 0 }) => {
+export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, onOpen }) => {
   const imageUrl =
     caseData.raw_media_urls?.[0] ||
     'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
-    >
+    <div>
       <Link
         to={`/case/${caseData.id}`}
+        onClick={() => onOpen?.(caseData.id)}
         className={cn('group flex flex-col h-full rounded-2xl overflow-hidden', className)}
         style={{
           background: 'var(--ink-soft)',
@@ -150,6 +146,6 @@ export const CaseCard: React.FC<CaseCardProps> = ({ caseData, className, index =
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };

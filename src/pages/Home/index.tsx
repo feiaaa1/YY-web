@@ -239,8 +239,8 @@ export default function HomePage() {
             href="/cases"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCases.map((c, i) => (
-              <CaseCard key={c.id} caseData={c} index={i} />
+            {featuredCases.map((c) => (
+              <CaseCard key={c.id} caseData={c} />
             ))}
           </div>
         </div>
@@ -260,8 +260,8 @@ export default function HomePage() {
             href="/cases?order=engagement_views"
           />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trendingCases.map((c, i) => (
-              <CaseCard key={`trending-${c.id}`} caseData={c} index={i} />
+            {trendingCases.map((c) => (
+              <CaseCard key={`trending-${c.id}`} caseData={c} />
             ))}
           </div>
         </div>

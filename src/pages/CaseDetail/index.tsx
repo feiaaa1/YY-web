@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import { CaseDetail, Case } from '@/types/database';
@@ -106,6 +106,7 @@ function SectionCard({ id, title, icon, children }: { id: string; title: string;
 
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [data, setData] = useState<CaseDetail | null>(null);
   const [related, setRelated] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,9 +155,29 @@ export default function CaseDetailPage() {
   const rawTextOriginal = data.raw_text?.trim();
   const rawText = rawLanguage === 'cn' && rawTextCn ? rawTextCn : rawTextOriginal;
   const hasRawLanguageSwitch = Boolean(rawTextCn && rawTextOriginal);
+  const handleBack = () => {
+    if ((window.history.state?.idx ?? 0) > 0) {
+      navigate(-1);
+    } else {
+      navigate('/cases');
+    }
+  };
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--ink)' }}>
+      <button
+        type="button"
+        onClick={handleBack}
+        className="fixed left-4 md:left-6 top-20 z-40 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+        style={{
+          background: 'color-mix(in srgb, var(--ink-soft) 88%, transparent)',
+          color: 'var(--text-primary)',
+          border: '1px solid var(--border-warm)',
+          backdropFilter: 'blur(14px)',
+        }}
+      >
+        <ArrowLeft className="w-4 h-4" /> 返回
+      </button>
 
       {/* ① Header / Hero */}
       <section id="hero">
@@ -177,12 +198,16 @@ export default function CaseDetailPage() {
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Back nav */}
           <div className="pt-6 pb-2">
-            <Link to="/cases" className="inline-flex items-center text-sm transition-colors" style={{ color: 'var(--text-muted)' }}
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex items-center text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
               onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--gold)')}
               onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}
             >
               <ArrowLeft className="w-4 h-4 mr-1" /> 返回案例库
-            </Link>
+            </button>
           </div>
 
           <div className="pb-10 pt-4">
@@ -505,8 +530,8 @@ export default function CaseDetailPage() {
             <div>
               <h2 className="text-xl font-bold mb-5" style={{ color: 'var(--text-primary)', fontFamily: 'Playfair Display, serif' }}>相关案例</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {related.map((c, i) => (
-                  <CaseCard key={c.id} caseData={c} index={i} />
+                {related.map((c) => (
+                  <CaseCard key={c.id} caseData={c} />
                 ))}
               </div>
             </div>

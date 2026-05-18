@@ -1,24 +1,28 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams, useNavigate, useNavigationType } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { Case } from '@/types/database';
 import { CaseCard } from '@/components/CaseCard';
 import { CATEGORY_MAP, REGION_MAP } from '@/lib/utils';
 import { SlidersHorizontal, X } from 'lucide-react';
 
+type CasesListCache = {
+  filterKey: string;
+  cases: Case[];
+  total: number;
+  page: number;
+  scrollY: number;
+  focusedCaseId?: string;
+};
+
+let casesListCache: CasesListCache | null = null;
+
 export default function CasesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
 
   const PAGE_SIZE = 20;
-
-  const [cases, setCases] = useState<Case[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(0);
-  const [batchStart, setBatchStart] = useState(0);
-  const [filterOpen, setFilterOpen] = useState(false);
 
   const currentQuery = searchParams.get('q') || '';
   const currentRegion = searchParams.get('region') || 'all';
@@ -29,14 +33,52 @@ export default function CasesPage() {
       | 'published_at'
       | 'engagement_views'
       | 'engagement_likes') || 'collected_at';
+  const filterKey = useMemo(
+    () => JSON.stringify({ q: currentQuery, region: currentRegion, type: currentType, order: currentOrder }),
+    [currentQuery, currentRegion, currentType, currentOrder]
+  );
+
+  const restoredCache = useMemo<CasesListCache | null>(() => {
+    if (navigationType !== 'POP') return null;
+    return casesListCache?.filterKey === filterKey ? casesListCache : null;
+  }, [filterKey, navigationType]);
+
+  const didRestoreRef = useRef(Boolean(restoredCache));
+  const previousFilterKeyRef = useRef(filterKey);
+  const shouldCenterRestoredCaseRef = useRef(Boolean(restoredCache));
+  const filterResetPendingRef = useRef(false);
+
+  const [cases, setCases] = useState<Case[]>(() => restoredCache?.cases ?? []);
+  const [loading, setLoading] = useState(() => !restoredCache);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [total, setTotal] = useState(() => restoredCache?.total ?? 0);
+  const [page, setPage] = useState(() => restoredCache?.page ?? 0);
+  const [batchStart, setBatchStart] = useState(0);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
+    if (previousFilterKeyRef.current === filterKey) return;
+    previousFilterKeyRef.current = filterKey;
+    didRestoreRef.current = false;
+    shouldCenterRestoredCaseRef.current = false;
+    filterResetPendingRef.current = true;
     setPage(0);
     setCases([]);
+    setTotal(0);
     setBatchStart(0);
-  }, [currentQuery, currentRegion, currentType, currentOrder]);
+    setLoading(true);
+  }, [filterKey]);
 
   useEffect(() => {
+    if (didRestoreRef.current) {
+      didRestoreRef.current = false;
+      return;
+    }
+    if (filterResetPendingRef.current) {
+      if (page !== 0) return;
+      filterResetPendingRef.current = false;
+    }
+
     const fetchCases = async () => {
       if (page === 0) setLoading(true);
       else setLoadingMore(true);
@@ -62,6 +104,44 @@ export default function CasesPage() {
 
     fetchCases();
   }, [currentQuery, currentRegion, currentType, currentOrder, page]);
+
+  useEffect(() => {
+    if (loading || loadingMore) return;
+    casesListCache = {
+      filterKey,
+      cases,
+      total,
+      page,
+      scrollY: window.scrollY,
+      focusedCaseId: casesListCache?.filterKey === filterKey ? casesListCache.focusedCaseId : undefined,
+    };
+  }, [cases, filterKey, loading, loadingMore, page, total]);
+
+  useLayoutEffect(() => {
+    if (!shouldCenterRestoredCaseRef.current || loading) return;
+    shouldCenterRestoredCaseRef.current = false;
+
+    window.requestAnimationFrame(() => {
+      const focusedCaseId = restoredCache?.focusedCaseId;
+      const focusedCard = focusedCaseId ? document.getElementById(`case-card-${focusedCaseId}`) : null;
+      if (focusedCard) {
+        focusedCard.scrollIntoView({ block: 'center', inline: 'nearest' });
+        return;
+      }
+      window.scrollTo(0, restoredCache?.scrollY ?? 0);
+    });
+  }, [loading, restoredCache]);
+
+  const saveListState = (focusedCaseId?: string) => {
+    casesListCache = {
+      filterKey,
+      cases,
+      total,
+      page,
+      scrollY: window.scrollY,
+      focusedCaseId,
+    };
+  };
 
   const hasMore = cases.length < total;
 
@@ -304,8 +384,10 @@ export default function CasesPage() {
                   共 {total} 个案例 · 已加载 {cases.length} 个
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {cases.map((c, idx) => (
-                    <CaseCard key={c.id} caseData={c} index={idx - batchStart} />
+                  {cases.map((c) => (
+                    <div key={c.id} id={`case-card-${c.id}`}>
+                      <CaseCard caseData={c} onOpen={saveListState} />
+                    </div>
                   ))}
                 </div>
 
