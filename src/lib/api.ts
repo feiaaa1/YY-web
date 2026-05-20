@@ -12,8 +12,35 @@ export const api = {
     limit?: number;
     offset?: number;
     search?: string;
+    tag?: string;
   }): Promise<{ data: Case[]; count?: number }> {
     try {
+      if (!supabase) throw new Error('SKIP_SUPABASE');
+
+      let tagCaseIds: string[] | null = null;
+      if (params?.tag) {
+        const tag = params.tag.trim();
+        const { data: matchingTags, error: tagError } = await supabase
+          .from('tags')
+          .select('id')
+          .or(`name.ilike.%${tag}%,name_cn.ilike.%${tag}%`);
+
+        if (tagError) throw tagError;
+
+        const tagIds = matchingTags?.map((item) => item.id) ?? [];
+        if (tagIds.length === 0) return { data: [], count: 0 };
+
+        const { data: matchingCaseTags, error: caseTagError } = await supabase
+          .from('case_tags')
+          .select('case_id')
+          .in('tag_id', tagIds);
+
+        if (caseTagError) throw caseTagError;
+
+        tagCaseIds = Array.from(new Set(matchingCaseTags?.map((item) => item.case_id) ?? []));
+        if (tagCaseIds.length === 0) return { data: [], count: 0 };
+      }
+
       let query = supabase
         .from('cases')
         .select(
@@ -33,6 +60,7 @@ export const api = {
         const q = params.search;
         query = query.or(`title.ilike.%${q}%,title_cn.ilike.%${q}%,summary.ilike.%${q}%,raw_text.ilike.%${q}%,raw_text_cn.ilike.%${q}%`);
       }
+      if (tagCaseIds) query = query.in('id', tagCaseIds);
 
       if (params?.order) {
         query = query.order(params.order, { ascending: false });
@@ -50,7 +78,9 @@ export const api = {
       }
       console.warn('Supabase getCases error:', error?.message);
     } catch (e) {
-      console.warn('Supabase getCases failed, falling back to mock.', e);
+      if (e instanceof Error && e.message !== 'SKIP_SUPABASE') {
+        console.warn('Supabase getCases failed, falling back to mock.', e);
+      }
     }
 
     // Mock fallback
@@ -61,6 +91,16 @@ export const api = {
     if (params?.search) {
       const q = params.search.toLowerCase();
       results = results.filter(c => c.title.toLowerCase().includes(q) || (c.summary ?? '').toLowerCase().includes(q));
+    }
+    if (params?.tag) {
+      const q = params.tag.toLowerCase();
+      results = results.filter(c =>
+        c.title.toLowerCase().includes(q) ||
+        (c.title_cn ?? '').toLowerCase().includes(q) ||
+        (c.summary ?? '').toLowerCase().includes(q) ||
+        (c.raw_text ?? '').toLowerCase().includes(q) ||
+        (c.raw_text_cn ?? '').toLowerCase().includes(q)
+      );
     }
     if (params?.order) {
       results.sort((a, b) => {
@@ -76,6 +116,8 @@ export const api = {
 
   async getCaseDetail(id: string): Promise<CaseDetail | null> {
     try {
+      if (!supabase) throw new Error('SKIP_SUPABASE');
+
       const { data, error } = await supabase
         .from('cases')
         .select(`
@@ -103,7 +145,9 @@ export const api = {
       }
       console.warn('Supabase getCaseDetail error:', error?.message);
     } catch (e) {
-      console.warn('Supabase getCaseDetail failed, falling back to mock.', e);
+      if (e instanceof Error && e.message !== 'SKIP_SUPABASE') {
+        console.warn('Supabase getCaseDetail failed, falling back to mock.', e);
+      }
     }
 
     const mockDetail = MOCK_CASES.find(c => c.id === id);
@@ -112,6 +156,8 @@ export const api = {
 
   async getRelatedCases(caseId: string, contentType: string, limit = 4): Promise<Case[]> {
     try {
+      if (!supabase) throw new Error('SKIP_SUPABASE');
+
       const { data, error } = await supabase
         .from('cases')
         .select(`id, title, title_cn, summary, brand_name, raw_media_urls, content_type, region, engagement_likes, engagement_comments, engagement_shares, engagement_views, is_featured, source_url, published_at, collected_at`)
@@ -122,13 +168,17 @@ export const api = {
       if (!error && data) return data as unknown as Case[];
       console.warn('Supabase getRelatedCases error:', error?.message);
     } catch (e) {
-      console.warn('Supabase getRelatedCases failed, falling back to mock.', e);
+      if (e instanceof Error && e.message !== 'SKIP_SUPABASE') {
+        console.warn('Supabase getRelatedCases failed, falling back to mock.', e);
+      }
     }
     return MOCK_CASES.filter(c => c.id !== caseId && c.content_type === contentType).slice(0, limit);
   },
 
   async getTags(): Promise<Tag[]> {
     try {
+      if (!supabase) throw new Error('SKIP_SUPABASE');
+
       const { data, error } = await supabase
         .from('tags')
         .select('id, name, name_cn, category, usage_count')
@@ -139,7 +189,9 @@ export const api = {
       }
       console.warn('Supabase getTags error:', error?.message);
     } catch (e) {
-      console.warn('Supabase getTags failed, falling back to mock.', e);
+      if (e instanceof Error && e.message !== 'SKIP_SUPABASE') {
+        console.warn('Supabase getTags failed, falling back to mock.', e);
+      }
     }
     return MOCK_TAGS;
   }

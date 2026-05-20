@@ -25,6 +25,7 @@ export default function CasesPage() {
   const PAGE_SIZE = 20;
 
   const currentQuery = searchParams.get('q') || '';
+  const currentTag = searchParams.get('tag') || '';
   const currentRegion = searchParams.get('region') || 'all';
   const currentType = searchParams.get('type') || 'all';
   const currentOrder =
@@ -34,8 +35,8 @@ export default function CasesPage() {
       | 'engagement_views'
       | 'engagement_likes') || 'collected_at';
   const filterKey = useMemo(
-    () => JSON.stringify({ q: currentQuery, region: currentRegion, type: currentType, order: currentOrder }),
-    [currentQuery, currentRegion, currentType, currentOrder]
+    () => JSON.stringify({ q: currentQuery, tag: currentTag, region: currentRegion, type: currentType, order: currentOrder }),
+    [currentQuery, currentTag, currentRegion, currentType, currentOrder]
   );
 
   const restoredCache = useMemo<CasesListCache | null>(() => {
@@ -53,7 +54,6 @@ export default function CasesPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(() => restoredCache?.total ?? 0);
   const [page, setPage] = useState(() => restoredCache?.page ?? 0);
-  const [batchStart, setBatchStart] = useState(0);
   const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
@@ -65,7 +65,6 @@ export default function CasesPage() {
     setPage(0);
     setCases([]);
     setTotal(0);
-    setBatchStart(0);
     setLoading(true);
   }, [filterKey]);
 
@@ -85,6 +84,7 @@ export default function CasesPage() {
 
       const res = await api.getCases({
         search: currentQuery,
+        tag: currentTag,
         region: currentRegion,
         content_type: currentType,
         order: currentOrder,
@@ -94,7 +94,6 @@ export default function CasesPage() {
 
       setCases((prev) => {
         if (page === 0) return res.data;
-        setBatchStart(prev.length);
         return [...prev, ...res.data];
       });
       setTotal(res.count ?? 0);
@@ -103,7 +102,7 @@ export default function CasesPage() {
     };
 
     fetchCases();
-  }, [currentQuery, currentRegion, currentType, currentOrder, page]);
+  }, [currentQuery, currentTag, currentRegion, currentType, currentOrder, page]);
 
   useEffect(() => {
     if (loading || loadingMore) return;
@@ -227,7 +226,7 @@ export default function CasesPage() {
                     type="text"
                     name="search"
                     defaultValue={currentQuery}
-                    placeholder="搜索案例名称…"
+                    placeholder={currentTag ? `标签：${currentTag}` : '搜索案例名称…'}
                     className="py-2.5 px-3 outline-none bg-transparent text-sm w-full md:w-56"
                     style={{ color: 'var(--text-primary)', caretColor: 'var(--gold)' }}
                   />

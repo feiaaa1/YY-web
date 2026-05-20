@@ -6,7 +6,7 @@ import { CaseDetail, Case } from '@/types/database';
 import { CATEGORY_MAP, REGION_MAP, formatDate } from '@/lib/utils';
 import { CaseCard } from '@/components/CaseCard';
 import {
-  ArrowLeft, ExternalLink, Heart, MessageCircle, Share2, Eye,
+  ArrowLeft, ExternalLink,
   Sparkles, Megaphone,
   ChevronDown, ChevronUp, MapPin, Calendar, Tag as TagIcon
 } from 'lucide-react';
@@ -506,7 +506,7 @@ export default function CaseDetailPage() {
                 {data.tags.map(({ tag }, i) => (
                   <Link
                     key={i}
-                    to={`/cases?tag=${tag.name}`}
+                    to={`/cases?tag=${encodeURIComponent(tag.name_cn || tag.name)}`}
                     className="px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200"
                     style={{ background: 'var(--ink-muted)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
                     onMouseEnter={e => {
